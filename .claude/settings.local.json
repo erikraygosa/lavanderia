@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/erikraygosa/Herd/**)",
+      "Bash(composer create-project *)",
+      "Bash(composer require *)",
+      "Bash(npm install *)",
+      "Bash(mysql -u root -e \"CREATE DATABASE IF NOT EXISTS lavanderia CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")",
+      "Bash(php artisan *)",
+      "Bash(mysql -u root lavanderia -e \"DROP TABLE IF EXISTS pedido_items, cortes, configuraciones;\")",
+      "Bash(php -r ' *)",
+      "Bash(npm run *)",
+      "Bash(mysql -u root lavanderia -e \"DESCRIBE pedidos;\")",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git branch *)",
+      "Bash(git remote *)"
+    ]
+  }
+}
