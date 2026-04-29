@@ -122,7 +122,12 @@
         <td class="right small">${{ number_format($pedido->subtotal, 2) }}</td>
     </tr>
     <tr>
-        <td class="small">Descuento</td>
+        <td class="small">
+            Descuento
+            @if($pedido->descuento_nota)
+                <br><span style="font-size:7pt; font-style:italic;">{{ $pedido->descuento_nota }}</span>
+            @endif
+        </td>
         <td class="right small">-${{ number_format($pedido->descuento, 2) }}</td>
     </tr>
     @endif

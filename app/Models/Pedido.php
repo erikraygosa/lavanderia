@@ -10,7 +10,7 @@ class Pedido extends Model
 {
     protected $fillable = [
         'folio', 'cliente_id', 'estado', 'fecha_entrega', 'hora_entrega',
-        'subtotal', 'descuento', 'total', 'metodo_pago', 'notas', 'pagado_en',
+        'subtotal', 'descuento', 'descuento_nota', 'total', 'metodo_pago', 'notas', 'pagado_en',
     ];
 
     protected $casts = [

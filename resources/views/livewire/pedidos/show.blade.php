@@ -98,7 +98,12 @@
                         </tr>
                         @if($pedido->descuento > 0)
                         <tr>
-                            <td colspan="3" class="px-4 py-2 text-right text-sm text-gray-600">Descuento</td>
+                            <td colspan="3" class="px-4 py-2 text-right text-sm text-gray-600">
+                                Descuento
+                                @if($pedido->descuento_nota)
+                                    <span class="block text-xs text-gray-400 italic">{{ $pedido->descuento_nota }}</span>
+                                @endif
+                            </td>
                             <td class="px-4 py-2 text-right text-red-600 font-medium">-${{ number_format($pedido->descuento, 2) }}</td>
                         </tr>
                         @endif

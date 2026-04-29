@@ -116,9 +116,28 @@
     <div class="ticket" id="ticket">
 
         {{-- Encabezado --}}
+        @php
+            $logoPath   = \App\Models\Configuracion::obtener('logo_path', '');
+            $negocioNom = \App\Models\Configuracion::obtener('negocio_nombre', 'Lavandería');
+            $negocioDir = \App\Models\Configuracion::obtener('negocio_direccion', '');
+            $negocioTel = \App\Models\Configuracion::obtener('negocio_telefono', '');
+        @endphp
         <div class="center">
-            <p class="logo">🧺 Lavandería</p>
-            <p class="small" style="margin-top:2px;">Sistema de gestión</p>
+            @if($logoPath)
+                @php
+                    $absPath = storage_path('app/public/' . $logoPath);
+                    $ext     = strtolower(pathinfo($absPath, PATHINFO_EXTENSION));
+                    $mime    = match($ext) { 'png' => 'image/png', 'gif' => 'image/gif', default => 'image/jpeg' };
+                    $b64     = file_exists($absPath) ? base64_encode(file_get_contents($absPath)) : '';
+                @endphp
+                @if($b64)
+                    <img src="data:{{ $mime }};base64,{{ $b64 }}"
+                         style="max-height:60px; max-width:180px; margin: 0 auto 4px; display:block;" alt="Logo" />
+                @endif
+            @endif
+            <p class="logo" style="font-size:14px;">{{ strtoupper($negocioNom) }}</p>
+            @if($negocioDir) <p class="small" style="margin-top:2px;">{{ $negocioDir }}</p> @endif
+            @if($negocioTel) <p class="small">Tel: {{ $negocioTel }}</p> @endif
         </div>
 
         <hr class="divider-solid" style="margin: 6px 0;">
@@ -184,7 +203,12 @@
             </tr>
             @if($pedido->descuento > 0)
             <tr>
-                <td class="small">Descuento</td>
+                <td class="small">
+                    Descuento
+                    @if($pedido->descuento_nota)
+                        <br><span style="font-size:9px; font-style:italic;">{{ $pedido->descuento_nota }}</span>
+                    @endif
+                </td>
                 <td class="right small">-${{ number_format($pedido->descuento, 2) }}</td>
             </tr>
             @endif

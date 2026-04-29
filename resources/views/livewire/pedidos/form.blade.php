@@ -180,6 +180,13 @@
                                 class="w-full text-right border border-gray-200 rounded px-2 py-1 pl-5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400" />
                         </div>
                     </div>
+                    @if((float)$descuento > 0)
+                    <div>
+                        <input wire:model.lazy="descuentoNota" type="text"
+                            placeholder="Motivo del descuento (opcional)"
+                            class="w-full border border-gray-200 rounded px-2 py-1 text-xs text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-400" />
+                    </div>
+                    @endif
                     <div class="flex justify-between pt-2 border-t border-gray-200">
                         <span class="font-semibold text-gray-900">Total</span>
                         <span class="font-bold text-lg text-indigo-700">${{ number_format($this->total, 2) }}</span>
