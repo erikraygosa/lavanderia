@@ -140,6 +140,46 @@ class WhatsappService
         }
     }
 
+    /**
+     * Notifica al cliente que su pedido está listo para recoger o en camino.
+     */
+    public function notificarListo(Pedido $pedido): bool
+    {
+        $pedido->loadMissing(['cliente']);
+
+        $telefono = $pedido->cliente->telefono;
+        if (!$telefono) {
+            $this->ultimoError = 'El cliente no tiene teléfono registrado.';
+            return false;
+        }
+
+        if (!$this->estaConfigurado()) {
+            $this->ultimoError = 'EvoAPI no está configurado.';
+            return false;
+        }
+
+        $negocio  = Configuracion::obtener('negocio_nombre', 'Lavandería');
+        $nombre   = $pedido->cliente->nombre;
+        $folio    = $pedido->folio;
+        $entrega  = $pedido->entregaFormateada();
+
+        if ($pedido->es_domicilio) {
+            $msg = "🧺 *{$negocio}*\n\n"
+                 . "Hola *{$nombre}*, su pedido *{$folio}* está listo y en camino a su domicilio. 🛵\n\n"
+                 . "📅 Entrega estimada: {$entrega}\n\n"
+                 . "Total: *\$" . number_format($pedido->total, 2) . "*\n\n"
+                 . "¡Gracias por su preferencia! 🙏";
+        } else {
+            $msg = "🧺 *{$negocio}*\n\n"
+                 . "Hola *{$nombre}*, su pedido *{$folio}* está listo para recoger. ✅\n\n"
+                 . "📅 Puede pasar desde: {$entrega}\n\n"
+                 . "Total a pagar: *\$" . number_format($pedido->total, 2) . "*\n\n"
+                 . "¡Le esperamos! 🙏";
+        }
+
+        return $this->enviarMensaje($telefono, $msg);
+    }
+
     private function textoTicket(Pedido $pedido): string
     {
         $negocio = Configuracion::obtener('negocio_nombre', 'Lavandería');

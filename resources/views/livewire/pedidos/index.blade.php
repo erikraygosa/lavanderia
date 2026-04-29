@@ -20,9 +20,11 @@
             <input wire:model.live.debounce.300ms="buscar" type="text" placeholder="Buscar por folio o cliente..." class="input-field flex-1 min-w-48" />
             <select wire:model.live="estado" class="input-field w-full sm:w-44">
                 <option value="">Todos los estados</option>
-                <option value="pendiente">Pendiente</option>
-                <option value="pagado">Pagado</option>
-                <option value="abandonado">Abandonado</option>
+                <option value="pendiente">⏳ Pendiente</option>
+                <option value="terminado">✅ Listo</option>
+                <option value="entregado">📦 Entregado</option>
+                <option value="pagado">💵 Pagado</option>
+                <option value="abandonado">❌ Abandonado</option>
             </select>
             <input wire:model.live="fecha" type="date" class="input-field w-full sm:w-44" />
         </div>
@@ -49,7 +51,12 @@
                             <a href="{{ route('pedidos.show', $pedido) }}" class="font-mono text-indigo-600 hover:text-indigo-800 font-medium">{{ $pedido->folio }}</a>
                             <p class="text-xs text-gray-400">{{ $pedido->created_at->format('d/m/Y') }}</p>
                         </td>
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ $pedido->cliente->nombre }}</td>
+                        <td class="px-4 py-3">
+                            <p class="font-medium text-gray-900">{{ $pedido->cliente->nombre }}</p>
+                            @if($pedido->es_domicilio)
+                                <span class="text-xs text-orange-600">🛵 Domicilio</span>
+                            @endif
+                        </td>
                         <td class="px-4 py-3">
                             <span class="badge-{{ $pedido->estado }}">{{ $badge['texto'] }}</span>
                         </td>

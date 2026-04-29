@@ -40,7 +40,7 @@
 
             {{-- Info cliente --}}
             <div class="card">
-                <div class="flex items-start justify-between">
+                <div class="flex items-start justify-between gap-4">
                     <div>
                         <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Cliente</p>
                         <p class="font-semibold text-gray-900 text-lg">{{ $pedido->cliente->nombre }}</p>
@@ -51,14 +51,25 @@
                             <p class="text-gray-500 text-sm">{{ $pedido->cliente->email }}</p>
                         @endif
                     </div>
-                    <div class="text-right">
-                        <p class="text-xs text-gray-400 mb-1">Fecha de entrega</p>
-                        <p class="font-medium text-gray-900">{{ $pedido->entregaFormateada() }}</p>
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-xs text-gray-400 mb-1">Entrega</p>
+                        <p class="font-medium text-gray-900 text-sm">{{ $pedido->entregaFormateada() }}</p>
+                        @if($pedido->es_domicilio)
+                            <span class="inline-flex items-center gap-1 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full mt-1">
+                                🛵 Domicilio
+                            </span>
+                        @endif
                         @if($pedido->fecha_entrega && $pedido->fecha_entrega->isPast() && $pedido->estado === 'pendiente')
-                            <span class="text-xs text-red-600 font-medium">Vencido</span>
+                            <span class="block text-xs text-red-600 font-medium mt-1">⚠️ Vencido</span>
                         @endif
                     </div>
                 </div>
+                @if($pedido->es_domicilio && $pedido->direccion_domicilio)
+                    <div class="mt-2 pt-2 border-t border-gray-100">
+                        <p class="text-xs text-gray-400 mb-0.5">📍 Dirección de entrega</p>
+                        <p class="text-sm text-gray-700">{{ $pedido->direccion_domicilio }}</p>
+                    </div>
+                @endif
                 @if($pedido->notas)
                     <div class="mt-3 pt-3 border-t border-gray-100">
                         <p class="text-xs text-gray-400 mb-1">Notas</p>
@@ -116,40 +127,124 @@
             </div>
         </div>
 
-        {{-- Panel de estado --}}
+        {{-- Panel lateral --}}
         <div class="space-y-4">
+
+            {{-- Estado y acciones --}}
             <div class="card">
                 <p class="text-xs text-gray-400 uppercase tracking-wider mb-2">Estado</p>
                 @php $badge = $pedido->estadoBadge(); @endphp
-                <span class="badge-{{ $pedido->estado }} text-sm px-3 py-1">{{ $badge['texto'] }}</span>
+                <span class="badge-{{ $pedido->estado }} text-sm px-3 py-1">
+                    {{ $badge['icon'] }} {{ $badge['texto'] }}
+                </span>
 
+                {{-- PENDIENTE --}}
                 @if($pedido->estado === 'pendiente')
                     <div class="mt-4 space-y-2">
-                        <p class="text-xs font-medium text-gray-600">Método de pago</p>
-                        <select wire:model="metodoPago" class="input-field">
-                            <option value="efectivo">Efectivo</option>
-                            <option value="tarjeta">Tarjeta</option>
-                            <option value="transferencia">Transferencia</option>
-                            <option value="otro">Otro</option>
-                        </select>
-                        <button wire:click="marcarPagado" class="btn-primary w-full justify-center mt-2">
-                            Marcar como pagado
+                        <button wire:click="marcarTerminado"
+                                class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors">
+                            ✅ Marcar como listo
                         </button>
                         <button wire:click="marcarAbandonado"
-                            wire:confirm="¿Marcar como abandonado este pedido?"
-                            class="btn-secondary w-full justify-center text-red-600 hover:text-red-700">
-                            Marcar abandonado
+                                wire:confirm="¿Marcar como abandonado?"
+                                class="btn-secondary w-full justify-center text-red-600 hover:text-red-700 text-sm">
+                            ❌ Marcar abandonado
                         </button>
                     </div>
-                @elseif($pedido->estado === 'pagado')
-                    <div class="mt-3 text-sm">
-                        <p class="text-gray-600">Pagado el: <strong>{{ $pedido->pagado_en?->format('d/m/Y H:i') }}</strong></p>
-                        <p class="text-gray-600">Método: <strong>{{ ucfirst($pedido->metodo_pago) }}</strong></p>
-                        <button wire:click="marcarPendiente" class="mt-3 text-xs text-gray-400 hover:text-gray-600">
+                @endif
+
+                {{-- TERMINADO (listo) --}}
+                @if($pedido->estado === 'terminado')
+                    <div class="mt-3 text-xs text-gray-500">
+                        Listo el: <strong>{{ $pedido->terminado_en?->format('d/m/Y H:i') }}</strong>
+                    </div>
+                    <div class="mt-4 space-y-2">
+                        {{-- Notificar al cliente --}}
+                        <button wire:click="notificarListo"
+                                wire:loading.attr="disabled"
+                                class="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors">
+                            <svg wire:loading wire:target="notificarListo" class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                            </svg>
+                            💬 Notificar al cliente (WhatsApp)
+                        </button>
+
+                        {{-- Marcar entregado --}}
+                        <button wire:click="marcarEntregado"
+                                class="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors">
+                            📦 Marcar como entregado
+                        </button>
+
+                        {{-- Cobrar --}}
+                        <div class="pt-2 border-t border-gray-100 space-y-2">
+                            <p class="text-xs font-medium text-gray-600">Cobrar ahora</p>
+                            <select wire:model="metodoPago" class="input-field">
+                                <option value="efectivo">Efectivo</option>
+                                <option value="tarjeta">Tarjeta</option>
+                                <option value="transferencia">Transferencia</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <button wire:click="marcarPagado" class="btn-primary w-full justify-center">
+                                💵 Cobrar pedido
+                            </button>
+                        </div>
+
+                        <button wire:click="marcarPendiente"
+                                class="text-xs text-gray-400 hover:text-gray-600 w-full text-center mt-1">
                             Revertir a pendiente
                         </button>
                     </div>
-                @elseif($pedido->estado === 'abandonado')
+                @endif
+
+                {{-- ENTREGADO --}}
+                @if($pedido->estado === 'entregado')
+                    <div class="mt-3 space-y-1 text-xs text-gray-500">
+                        @if($pedido->terminado_en)
+                            <p>Listo el: <strong>{{ $pedido->terminado_en->format('d/m/Y H:i') }}</strong></p>
+                        @endif
+                        <p>Entregado el: <strong>{{ $pedido->entregado_en?->format('d/m/Y H:i') }}</strong></p>
+                    </div>
+                    <div class="mt-4 space-y-2">
+                        <div class="space-y-2">
+                            <p class="text-xs font-medium text-gray-600">Registrar pago</p>
+                            <select wire:model="metodoPago" class="input-field">
+                                <option value="efectivo">Efectivo</option>
+                                <option value="tarjeta">Tarjeta</option>
+                                <option value="transferencia">Transferencia</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <button wire:click="marcarPagado" class="btn-primary w-full justify-center">
+                                💵 Cobrar pedido
+                            </button>
+                        </div>
+                        <button wire:click="marcarPendiente"
+                                class="text-xs text-gray-400 hover:text-gray-600 w-full text-center">
+                            Revertir a pendiente
+                        </button>
+                    </div>
+                @endif
+
+                {{-- PAGADO --}}
+                @if($pedido->estado === 'pagado')
+                    <div class="mt-3 text-sm space-y-1">
+                        @if($pedido->terminado_en)
+                            <p class="text-xs text-gray-500">Listo el: <strong>{{ $pedido->terminado_en->format('d/m/Y H:i') }}</strong></p>
+                        @endif
+                        @if($pedido->entregado_en)
+                            <p class="text-xs text-gray-500">Entregado el: <strong>{{ $pedido->entregado_en->format('d/m/Y H:i') }}</strong></p>
+                        @endif
+                        <p class="text-gray-600">Pagado el: <strong>{{ $pedido->pagado_en?->format('d/m/Y H:i') }}</strong></p>
+                        <p class="text-gray-600">Método: <strong>{{ ucfirst($pedido->metodo_pago) }}</strong></p>
+                    </div>
+                    <button wire:click="marcarPendiente"
+                            class="mt-3 text-xs text-gray-400 hover:text-gray-600">
+                        Revertir a pendiente
+                    </button>
+                @endif
+
+                {{-- ABANDONADO --}}
+                @if($pedido->estado === 'abandonado')
                     <div class="mt-3">
                         <button wire:click="marcarPendiente" class="btn-secondary w-full justify-center text-sm">
                             Reactivar pedido
@@ -158,9 +253,15 @@
                 @endif
             </div>
 
+            {{-- Total --}}
             <div class="card text-center">
                 <p class="text-2xl font-bold text-indigo-700">${{ number_format($pedido->total, 2) }}</p>
                 <p class="text-sm text-gray-500 mt-1">Total del pedido</p>
+                @if($pedido->es_domicilio)
+                    <span class="inline-block mt-2 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
+                        🛵 Envío a domicilio
+                    </span>
+                @endif
             </div>
         </div>
     </div>

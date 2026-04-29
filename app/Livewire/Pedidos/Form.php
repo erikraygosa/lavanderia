@@ -32,6 +32,8 @@ class Form extends Component
     public string $notas = '';
     public string $descuento = '0';
     public string $descuentoNota = '';
+    public bool   $esDomicilio = false;
+    public string $direccionDomicilio = '';
 
     public function mount(?Pedido $pedido = null): void
     {
@@ -44,9 +46,11 @@ class Form extends Component
             $this->clienteNombre = $pedido->cliente->nombre;
             $this->fechaEntrega = $pedido->fecha_entrega?->format('Y-m-d') ?? '';
             $this->horaEntrega  = $pedido->hora_entrega ? substr($pedido->hora_entrega, 0, 5) : '18:00';
-            $this->notas         = $pedido->notas ?? '';
-            $this->descuento     = number_format($pedido->descuento, 2, '.', '');
-            $this->descuentoNota = $pedido->descuento_nota ?? '';
+            $this->notas              = $pedido->notas ?? '';
+            $this->descuento          = number_format($pedido->descuento, 2, '.', '');
+            $this->descuentoNota      = $pedido->descuento_nota ?? '';
+            $this->esDomicilio        = (bool) $pedido->es_domicilio;
+            $this->direccionDomicilio = $pedido->direccion_domicilio ?? '';
 
             foreach ($pedido->items as $item) {
                 $this->items[] = [
@@ -182,11 +186,13 @@ class Form extends Component
             'cliente_id'    => $this->clienteId,
             'fecha_entrega' => $this->fechaEntrega,
             'hora_entrega'  => $this->horaEntrega ?: null,
-            'notas'          => $this->notas,
-            'subtotal'       => $this->subtotal,
-            'descuento'      => (float)($this->descuento ?? 0),
-            'descuento_nota' => $this->descuentoNota ?: null,
-            'total'          => $this->total,
+            'notas'               => $this->notas,
+            'subtotal'            => $this->subtotal,
+            'descuento'           => (float)($this->descuento ?? 0),
+            'descuento_nota'      => $this->descuentoNota ?: null,
+            'total'               => $this->total,
+            'es_domicilio'        => $this->esDomicilio,
+            'direccion_domicilio' => $this->esDomicilio ? ($this->direccionDomicilio ?: null) : null,
         ];
 
         if ($this->pedido && $this->pedido->exists) {

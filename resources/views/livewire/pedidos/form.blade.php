@@ -164,6 +164,23 @@
                 </div>
             </div>
 
+            {{-- Envío a domicilio --}}
+            <div class="card space-y-2">
+                <label class="flex items-center gap-3 cursor-pointer select-none">
+                    <input wire:model.live="esDomicilio" type="checkbox"
+                           class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-400" />
+                    <div>
+                        <p class="font-medium text-gray-900 text-sm">Envío a domicilio 🛵</p>
+                        <p class="text-xs text-gray-400">Marcar si se entrega en casa del cliente</p>
+                    </div>
+                </label>
+                @if($esDomicilio)
+                    <input wire:model="direccionDomicilio" type="text"
+                           class="input-field"
+                           placeholder="Dirección de entrega..." />
+                @endif
+            </div>
+
             {{-- Resumen --}}
             <div class="card">
                 <h3 class="font-medium text-gray-900 mb-3">Resumen</h3>
