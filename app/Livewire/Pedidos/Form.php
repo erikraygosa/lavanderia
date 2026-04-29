@@ -92,6 +92,16 @@ class Form extends Component
     {
         $this->clienteId = null;
         $this->clienteNombre = '';
+        $this->esDomicilio = false;
+        $this->direccionDomicilio = '';
+    }
+
+    public function updatedEsDomicilio(bool $value): void
+    {
+        if ($value && $this->clienteId && empty($this->direccionDomicilio)) {
+            $cliente = \App\Models\Cliente::find($this->clienteId);
+            $this->direccionDomicilio = $cliente?->direccion ?? '';
+        }
     }
 
     public function buscarItem(): void
