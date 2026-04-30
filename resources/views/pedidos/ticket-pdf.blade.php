@@ -163,6 +163,38 @@
 <p class="small">{{ $pedido->notas }}</p>
 @endif
 
+@php
+    $ticketMensaje = \App\Models\Configuracion::obtener('ticket_mensaje', '');
+    $facebookUrl   = \App\Models\Configuracion::obtener('facebook_url', '');
+    $qrBase64      = '';
+
+    if ($facebookUrl) {
+        try {
+            $qr = \Endroid\QrCode\QrCode::create($facebookUrl)
+                ->setSize(120)
+                ->setMargin(4);
+            $writer = new \Endroid\QrCode\Writer\PngWriter();
+            $result = $writer->write($qr);
+            $qrBase64 = base64_encode($result->getString());
+        } catch (\Exception $e) {
+            $qrBase64 = '';
+        }
+    }
+@endphp
+
+@if($ticketMensaje)
+<div class="divider"></div>
+<p class="center small bold" style="font-size:9pt;">{{ $ticketMensaje }}</p>
+@endif
+
+@if($qrBase64)
+<div class="divider"></div>
+<p class="center small">Síguenos en redes sociales</p>
+<div class="center" style="margin: 4px 0;">
+    <img src="data:image/png;base64,{{ $qrBase64 }}" style="width:28mm; height:28mm;" alt="QR" />
+</div>
+@endif
+
 <div class="divider-solid" style="margin: 6px 0;"></div>
 <p class="center small">Gracias por su preferencia</p>
 <p class="center small">{{ now()->format('d/m/Y H:i') }}</p>

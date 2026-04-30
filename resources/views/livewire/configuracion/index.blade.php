@@ -65,6 +65,17 @@
                 <label class="label-field">Dirección</label>
                 <input wire:model="negocioDireccion" type="text" class="input-field" placeholder="Calle 5 #123, Colonia..." />
             </div>
+            <div>
+                <label class="label-field">Facebook / Redes sociales</label>
+                <input wire:model="facebookUrl" type="url" class="input-field" placeholder="https://facebook.com/tulavanderia" />
+                <p class="text-xs text-gray-400 mt-1">Aparecerá como código QR al pie del ticket.</p>
+            </div>
+            <div>
+                <label class="label-field">Mensaje promocional en tickets</label>
+                <textarea wire:model="ticketMensaje" rows="2" class="input-field resize-none"
+                          placeholder="Ej: ¡Los lunes 20% de descuento en edredones!"></textarea>
+                <p class="text-xs text-gray-400 mt-1">Se imprime al pie de cada ticket.</p>
+            </div>
         </div>
 
         {{-- EvoAPI --}}

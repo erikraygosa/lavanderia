@@ -21,6 +21,10 @@ class Index extends Component
     public string $negocioTelefono = '';
     public string $negocioDireccion= '';
 
+    // Ticket
+    public string $ticketMensaje  = '';
+    public string $facebookUrl    = '';
+
     // Logo
     public $logoArchivo  = null;   // archivo temporal Livewire
     public string $logoPath = '';  // ruta guardada en config
@@ -37,7 +41,9 @@ class Index extends Component
         $this->negocioNombre    = Configuracion::obtener('negocio_nombre', 'Lavandería');
         $this->negocioTelefono  = Configuracion::obtener('negocio_telefono', '');
         $this->negocioDireccion = Configuracion::obtener('negocio_direccion', '');
-        $this->logoPath      = Configuracion::obtener('logo_path', '');
+        $this->logoPath         = Configuracion::obtener('logo_path', '');
+        $this->ticketMensaje    = Configuracion::obtener('ticket_mensaje', '');
+        $this->facebookUrl      = Configuracion::obtener('facebook_url', '');
     }
 
     public function guardar(): void
@@ -71,6 +77,8 @@ class Index extends Component
         Configuracion::establecer('negocio_nombre',    $this->negocioNombre);
         Configuracion::establecer('negocio_telefono',  $this->negocioTelefono);
         Configuracion::establecer('negocio_direccion', $this->negocioDireccion);
+        Configuracion::establecer('ticket_mensaje',    $this->ticketMensaje);
+        Configuracion::establecer('facebook_url',      $this->facebookUrl);
 
         $this->mensajeExito = 'Configuración guardada correctamente.';
         $this->mensajeError = '';

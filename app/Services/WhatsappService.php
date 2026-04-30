@@ -108,17 +108,17 @@ class WhatsappService
         $caption = $this->textoTicket($pedido);
 
         try {
-            // Intentar enviar como documento PDF
+            // Enviar solo el PDF, sin texto adicional
             $response = $this->httpClient()
                 ->post("{$this->baseUrl}/message/sendMedia/{$this->instancia}", [
                     'number'  => $tel,
-                    'text'    => $caption,
+                    'text'    => '',
                     'options' => ['delay' => 1000],
                     'mediaMessage' => [
                         'mediatype' => 'document',
                         'media'     => $base64,
                         'fileName'  => "ticket-{$pedido->folio}.pdf",
-                        'caption'   => $caption,
+                        'caption'   => '',
                     ],
                 ]);
 
@@ -126,11 +126,9 @@ class WhatsappService
                 return true;
             }
 
-            // Si falla el documento, intentar enviar solo el texto
-            $this->ultimoError = "PDF HTTP {$response->status()}: " . $response->body();
-            Log::warning('EvoAPI sendMedia falló, intentando texto', ['body' => $response->body()]);
-
-            return $this->enviarMensaje($telefono, $caption);
+            $this->ultimoError = "HTTP {$response->status()}: " . $response->body();
+            Log::warning('EvoAPI sendMedia falló', ['status' => $response->status(), 'body' => $response->body()]);
+            return false;
 
         } catch (\Exception $e) {
             $this->ultimoError = $e->getMessage();

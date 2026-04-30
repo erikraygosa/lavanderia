@@ -244,6 +244,26 @@
         <p class="small">{{ $pedido->notas }}</p>
         @endif
 
+        @php
+            $ticketMensaje = \App\Models\Configuracion::obtener('ticket_mensaje', '');
+            $facebookUrl   = \App\Models\Configuracion::obtener('facebook_url', '');
+        @endphp
+
+        @if($ticketMensaje)
+        <hr class="divider" style="margin: 5px 0;">
+        <p class="center bold small" style="font-size:10px;">{{ $ticketMensaje }}</p>
+        @endif
+
+        @if($facebookUrl)
+        <hr class="divider" style="margin: 5px 0;">
+        <p class="center small">Síguenos en redes sociales</p>
+        <div style="text-align:center; margin: 4px 0;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ urlencode($facebookUrl) }}"
+                 style="width:80px; height:80px;" alt="QR" />
+        </div>
+        <p class="center small" style="font-size:9px;">{{ $facebookUrl }}</p>
+        @endif
+
         <hr class="divider-solid" style="margin: 8px 0;">
         <p class="center small">¡Gracias por su preferencia!</p>
         <p class="center small" style="margin-top:2px;">{{ now()->format('d/m/Y H:i') }}</p>
