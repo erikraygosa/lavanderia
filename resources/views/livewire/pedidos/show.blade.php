@@ -204,25 +204,31 @@
                             <p>Listo el: <strong>{{ $pedido->terminado_en->format('d/m/Y H:i') }}</strong></p>
                         @endif
                         <p>Entregado el: <strong>{{ $pedido->entregado_en?->format('d/m/Y H:i') }}</strong></p>
+                        @if($pedido->pagado_en)
+                            <p>Pagado el: <strong>{{ $pedido->pagado_en->format('d/m/Y H:i') }}</strong></p>
+                            @if($pedido->metodo_pago)
+                                <p>Método: <strong>{{ ucfirst($pedido->metodo_pago) }}</strong></p>
+                            @endif
+                        @endif
                     </div>
+                    @if(!$pedido->pagado_en)
                     <div class="mt-4 space-y-2">
-                        <div class="space-y-2">
-                            <p class="text-xs font-medium text-gray-600">Registrar pago</p>
-                            <select wire:model="metodoPago" class="input-field">
-                                <option value="efectivo">Efectivo</option>
-                                <option value="tarjeta">Tarjeta</option>
-                                <option value="transferencia">Transferencia</option>
-                                <option value="otro">Otro</option>
-                            </select>
-                            <button wire:click="marcarPagado" class="btn-primary w-full justify-center">
-                                💵 Cobrar pedido
-                            </button>
-                        </div>
-                        <button wire:click="marcarPendiente"
-                                class="text-xs text-gray-400 hover:text-gray-600 w-full text-center">
-                            Revertir a pendiente
+                        <p class="text-xs font-medium text-gray-600">Registrar pago</p>
+                        <select wire:model="metodoPago" class="input-field">
+                            <option value="efectivo">Efectivo</option>
+                            <option value="tarjeta">Tarjeta</option>
+                            <option value="transferencia">Transferencia</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                        <button wire:click="marcarPagado" class="btn-primary w-full justify-center">
+                            💵 Cobrar pedido
                         </button>
                     </div>
+                    @endif
+                    <button wire:click="marcarPendiente"
+                            class="mt-3 text-xs text-gray-400 hover:text-gray-600 w-full text-center block">
+                        Revertir a pendiente
+                    </button>
                 @endif
 
                 {{-- PAGADO --}}
@@ -231,16 +237,21 @@
                         @if($pedido->terminado_en)
                             <p class="text-xs text-gray-500">Listo el: <strong>{{ $pedido->terminado_en->format('d/m/Y H:i') }}</strong></p>
                         @endif
-                        @if($pedido->entregado_en)
-                            <p class="text-xs text-gray-500">Entregado el: <strong>{{ $pedido->entregado_en->format('d/m/Y H:i') }}</strong></p>
-                        @endif
                         <p class="text-gray-600">Pagado el: <strong>{{ $pedido->pagado_en?->format('d/m/Y H:i') }}</strong></p>
-                        <p class="text-gray-600">Método: <strong>{{ ucfirst($pedido->metodo_pago) }}</strong></p>
+                        @if($pedido->metodo_pago)
+                            <p class="text-gray-600">Método: <strong>{{ ucfirst($pedido->metodo_pago) }}</strong></p>
+                        @endif
                     </div>
-                    <button wire:click="marcarPendiente"
-                            class="mt-3 text-xs text-gray-400 hover:text-gray-600">
-                        Revertir a pendiente
-                    </button>
+                    <div class="mt-4 space-y-2">
+                        <button wire:click="marcarEntregado"
+                                class="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors">
+                            📦 Marcar como entregado
+                        </button>
+                        <button wire:click="marcarPendiente"
+                                class="text-xs text-gray-400 hover:text-gray-600 w-full text-center">
+                            Revertir a pendiente
+                        </button>
+                    </div>
                 @endif
 
                 {{-- ABANDONADO --}}
