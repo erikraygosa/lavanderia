@@ -164,7 +164,8 @@ class WhatsappService
 
         // Construir la fecha/hora de recogida con los valores editados
         if ($fecha) {
-            $dt = \Carbon\Carbon::parse($fecha);
+            // ->locale('es') forzado para garantizar español sin depender del global
+            $dt = \Carbon\Carbon::parse($fecha)->locale('es');
             $fechaStr = $dt->isoFormat('dddd D [de] MMMM');
             if ($hora) {
                 $fechaStr .= ' a las ' . substr($hora, 0, 5) . ' hrs';

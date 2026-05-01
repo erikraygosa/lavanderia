@@ -164,8 +164,9 @@
 @endif
 
 @php
-    $ticketMensaje = \App\Models\Configuracion::obtener('ticket_mensaje', '');
-    $facebookUrl   = \App\Models\Configuracion::obtener('facebook_url', '');
+    $ticketMensaje   = \App\Models\Configuracion::obtener('ticket_mensaje', '');
+    $facebookUrl     = \App\Models\Configuracion::obtener('facebook_url', '');
+    $horariosTrabajo = \App\Models\Configuracion::obtener('horarios_trabajo', '');
     $qrBase64      = '';
 
     if ($facebookUrl) {
@@ -181,6 +182,16 @@
         }
     }
 @endphp
+
+@if($horariosTrabajo)
+<div class="divider"></div>
+<p class="center bold small" style="font-size:7.5pt; letter-spacing:0.4px;">HORARIOS DE ATENCIÓN</p>
+@foreach(explode("\n", $horariosTrabajo) as $linea)
+    @if(trim($linea))
+        <p class="center small" style="font-size:7pt; margin-top:1px;">{{ trim($linea) }}</p>
+    @endif
+@endforeach
+@endif
 
 @if($ticketMensaje)
 <div class="divider"></div>

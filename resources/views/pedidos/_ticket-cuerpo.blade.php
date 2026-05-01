@@ -124,6 +124,17 @@
 <p class="small">{{ $pedido->notas }}</p>
 @endif
 
+{{-- Horarios de atención --}}
+@if($horariosTrabajo ?? '')
+<hr class="divider" style="margin: 4px 0;">
+<p class="center bold small" style="font-size:9px; letter-spacing:0.5px;">HORARIOS DE ATENCIÓN</p>
+@foreach(explode("\n", $horariosTrabajo) as $linea)
+    @if(trim($linea))
+        <p class="center small" style="font-size:8px; margin-top:1px;">{{ trim($linea) }}</p>
+    @endif
+@endforeach
+@endif
+
 {{-- Mensaje promocional --}}
 @if($ticketMensaje)
 <hr class="divider" style="margin: 4px 0;">

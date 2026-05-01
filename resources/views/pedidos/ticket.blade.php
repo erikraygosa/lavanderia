@@ -113,8 +113,9 @@
     $negocioNom    = \App\Models\Configuracion::obtener('negocio_nombre', 'Lavandería');
     $negocioDir    = \App\Models\Configuracion::obtener('negocio_direccion', '');
     $negocioTel    = \App\Models\Configuracion::obtener('negocio_telefono', '');
-    $ticketMensaje = \App\Models\Configuracion::obtener('ticket_mensaje', '');
-    $facebookUrl   = \App\Models\Configuracion::obtener('facebook_url', '');
+    $ticketMensaje   = \App\Models\Configuracion::obtener('ticket_mensaje', '');
+    $facebookUrl     = \App\Models\Configuracion::obtener('facebook_url', '');
+    $horariosTrabajo = \App\Models\Configuracion::obtener('horarios_trabajo', '');
 
     // Logo en base64
     $logoB64  = '';
@@ -140,15 +141,16 @@
     <p class="etiqueta-copia">— ORIGINAL —</p>
 
     @include('pedidos._ticket-cuerpo', [
-        'logoB64'      => $logoB64,
-        'logoMime'     => $logoMime,
-        'negocioNom'   => $negocioNom,
-        'negocioDir'   => $negocioDir,
-        'negocioTel'   => $negocioTel,
-        'pedido'       => $pedido,
-        'ticketMensaje'=> $ticketMensaje,
-        'facebookUrl'  => $facebookUrl,
-        'mostrarQr'    => false,   // QR solo en la copia del cliente
+        'logoB64'         => $logoB64,
+        'logoMime'        => $logoMime,
+        'negocioNom'      => $negocioNom,
+        'negocioDir'      => $negocioDir,
+        'negocioTel'      => $negocioTel,
+        'pedido'          => $pedido,
+        'ticketMensaje'   => $ticketMensaje,
+        'facebookUrl'     => $facebookUrl,
+        'horariosTrabajo' => $horariosTrabajo,
+        'mostrarQr'       => false,
     ])
 </div>
 
@@ -166,15 +168,16 @@
     <p class="etiqueta-copia">— COPIA CLIENTE —</p>
 
     @include('pedidos._ticket-cuerpo', [
-        'logoB64'      => $logoB64,
-        'logoMime'     => $logoMime,
-        'negocioNom'   => $negocioNom,
-        'negocioDir'   => $negocioDir,
-        'negocioTel'   => $negocioTel,
-        'pedido'       => $pedido,
-        'ticketMensaje'=> $ticketMensaje,
-        'facebookUrl'  => $facebookUrl,
-        'mostrarQr'    => true,    // QR aparece solo en la copia del cliente
+        'logoB64'         => $logoB64,
+        'logoMime'        => $logoMime,
+        'negocioNom'      => $negocioNom,
+        'negocioDir'      => $negocioDir,
+        'negocioTel'      => $negocioTel,
+        'pedido'          => $pedido,
+        'ticketMensaje'   => $ticketMensaje,
+        'facebookUrl'     => $facebookUrl,
+        'horariosTrabajo' => $horariosTrabajo,
+        'mostrarQr'       => true,
     ])
 </div>
 
