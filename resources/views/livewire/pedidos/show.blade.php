@@ -22,7 +22,7 @@
             {{-- URL pública para imprimir desde terminal sin login --}}
             <div x-data="{ copiado: false }" class="relative">
                 <button
-                    @click="navigator.clipboard.writeText('{{ $pedido->ticketUrl() }}').then(() => { copiado = true; setTimeout(() => copiado = false, 2000) })"
+                    @click="navigator.clipboard.writeText('{{ route('pedidos.ticket.publico', ['pedido' => $pedido->id, 'token' => $pedido->ticketToken()]) }}').then(() => { copiado = true; setTimeout(() => copiado = false, 2000) })"
                     title="Copiar URL del ticket (sin login)"
                     class="btn-secondary px-2.5">
                     <svg x-show="!copiado" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
