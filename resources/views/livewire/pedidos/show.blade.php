@@ -19,6 +19,21 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
+            {{-- URL pública para imprimir desde terminal sin login --}}
+            <div x-data="{ copiado: false }" class="relative">
+                <button
+                    @click="navigator.clipboard.writeText('{{ $pedido->ticketUrl() }}').then(() => { copiado = true; setTimeout(() => copiado = false, 2000) })"
+                    title="Copiar URL del ticket (sin login)"
+                    class="btn-secondary px-2.5">
+                    <svg x-show="!copiado" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                    </svg>
+                    <svg x-show="copiado" class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span x-text="copiado ? 'URL copiada' : 'URL ticket'" class="text-xs hidden sm:inline"></span>
+                </button>
+            </div>
             <a href="{{ route('pedidos.ticket', $pedido) }}" target="_blank" class="btn-secondary">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 Imprimir ticket

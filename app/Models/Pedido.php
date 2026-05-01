@@ -53,6 +53,24 @@ class Pedido extends Model
         return 'LAV-' . $anio . '-' . str_pad($ultimo + 1, 4, '0', STR_PAD_LEFT);
     }
 
+    /**
+     * Token estático para acceso público al ticket sin login.
+     * Basado en el ID del pedido + APP_KEY → no expira, no se guarda en BD.
+     */
+    public function ticketToken(): string
+    {
+        return hash('sha256', $this->id . config('app.key'));
+    }
+
+    /** URL pública del ticket (para imprimir sin login) */
+    public function ticketUrl(): string
+    {
+        return route('pedidos.ticket.publico', [
+            'pedido' => $this->id,
+            'token'  => $this->ticketToken(),
+        ]);
+    }
+
     public function estadoBadge(): array
     {
         return match($this->estado) {

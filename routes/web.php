@@ -3,6 +3,13 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+// ── Ticket público con token (sin login — para imprimir desde terminal) ─────
+Route::get('/ticket/{pedido}/{token}', function (\App\Models\Pedido $pedido, string $token) {
+    abort_unless(hash_equals($pedido->ticketToken(), $token), 403, 'Token inválido.');
+    $pedido->load('items', 'cliente');
+    return view('pedidos.ticket', compact('pedido'));
+})->name('pedidos.ticket.publico');
+
 // ── Autenticación ───────────────────────────────────────────────────────────
 Route::get('/login', \App\Livewire\Auth\Login::class)->name('login')->middleware('guest');
 Route::post('/logout', function () {
