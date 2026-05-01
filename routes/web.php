@@ -3,10 +3,10 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-// ── Ticket público con token (sin login — para imprimir desde terminal) ─────
-Route::get('/ticket/{pedido}/{token}', function (\App\Models\Pedido $pedido, string $token) {
-    abort_unless(hash_equals($pedido->ticketToken(), $token), 403, 'Token inválido.');
-    $pedido->load('items', 'cliente');
+// ── Ticket público con token global (sin login — para imprimir desde terminal)
+Route::get('/ticket/{id}', function ($id) {
+    abort_unless(request('token') === config('app.ticket_token'), 403, 'Token inválido.');
+    $pedido = \App\Models\Pedido::with('items', 'cliente')->findOrFail($id);
     return view('pedidos.ticket', compact('pedido'));
 })->name('pedidos.ticket.publico');
 

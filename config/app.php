@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'ticket_token' => env('TICKET_TOKEN', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
