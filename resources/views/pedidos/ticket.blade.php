@@ -101,7 +101,16 @@
             body { background: white; padding: 0; gap: 0; }
             .copia { box-shadow: none; padding: 4mm 3mm; }
             .acciones { display: none; }
-            .corte { background: white; padding: 3px 0; }
+
+            /* Ocultar la línea visual de corte — la impresora hace el corte físico */
+            .corte { display: none; }
+
+            /* Salto de página entre copias → activa el auto-corte del driver */
+            .copia-original {
+                page-break-after: always;
+                break-after: page;
+            }
+
             @page { margin: 0; size: 80mm auto; }
         }
     </style>
@@ -137,7 +146,7 @@
 {{-- ════════════════════════════════════════════════════════════════════════ --}}
 {{-- COPIA 1 — ORIGINAL (tienda)                                             --}}
 {{-- ════════════════════════════════════════════════════════════════════════ --}}
-<div class="copia">
+<div class="copia copia-original">
     <p class="etiqueta-copia">— ORIGINAL —</p>
 
     @include('pedidos._ticket-cuerpo', [
