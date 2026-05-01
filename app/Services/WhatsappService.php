@@ -108,18 +108,15 @@ class WhatsappService
         $caption = $this->textoTicket($pedido);
 
         try {
-            // Enviar solo el PDF, sin texto adicional
+            // EvoAPI requiere mediatype en el nivel raíz del body
             $response = $this->httpClient()
                 ->post("{$this->baseUrl}/message/sendMedia/{$this->instancia}", [
-                    'number'  => $tel,
-                    'text'    => '',
-                    'options' => ['delay' => 1000],
-                    'mediaMessage' => [
-                        'mediatype' => 'document',
-                        'media'     => $base64,
-                        'fileName'  => "ticket-{$pedido->folio}.pdf",
-                        'caption'   => '',
-                    ],
+                    'number'    => $tel,
+                    'mediatype' => 'document',
+                    'media'     => $base64,
+                    'fileName'  => "ticket-{$pedido->folio}.pdf",
+                    'caption'   => '',
+                    'options'   => ['delay' => 1000],
                 ]);
 
             if ($response->successful()) {
