@@ -171,11 +171,12 @@
 
     if ($facebookUrl) {
         try {
-            $qr = \Endroid\QrCode\QrCode::create($facebookUrl)
-                ->setSize(120)
-                ->setMargin(4);
-            $writer = new \Endroid\QrCode\Writer\PngWriter();
-            $result = $writer->write($qr);
+            // endroid/qr-code v6: Builder con named arguments
+            $result = (new \Endroid\QrCode\Builder\Builder(
+                data:   $facebookUrl,
+                size:   120,
+                margin: 4,
+            ))->build();
             $qrBase64 = base64_encode($result->getString());
         } catch (\Exception $e) {
             $qrBase64 = '';
