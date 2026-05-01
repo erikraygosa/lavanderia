@@ -139,9 +139,10 @@ class WhatsappService
     }
 
     /**
-     * Notifica al cliente que su pedido está listo para recoger o en camino.
+     * Notifica al cliente que su pedido está listo.
+     * Acepta fecha y hora editadas desde el formulario del pedido.
      */
-    public function notificarListo(Pedido $pedido): bool
+    public function notificarListo(Pedido $pedido, string $fecha = '', string $hora = ''): bool
     {
         $pedido->loadMissing(['cliente']);
 
@@ -157,23 +158,39 @@ class WhatsappService
         }
 
         $negocio  = Configuracion::obtener('negocio_nombre', 'Lavandería');
+        $horarios = Configuracion::obtener('horarios_trabajo', '');
         $nombre   = $pedido->cliente->nombre;
         $folio    = $pedido->folio;
-        $entrega  = $pedido->entregaFormateada();
+
+        // Construir la fecha/hora de recogida con los valores editados
+        if ($fecha) {
+            $dt = \Carbon\Carbon::parse($fecha);
+            $fechaStr = $dt->isoFormat('dddd D [de] MMMM');
+            if ($hora) {
+                $fechaStr .= ' a las ' . substr($hora, 0, 5) . ' hrs';
+            }
+        } else {
+            $fechaStr = $pedido->entregaFormateada();
+        }
 
         if ($pedido->es_domicilio) {
             $msg = "🧺 *{$negocio}*\n\n"
                  . "Hola *{$nombre}*, su pedido *{$folio}* está listo y en camino a su domicilio. 🛵\n\n"
-                 . "📅 Entrega estimada: {$entrega}\n\n"
-                 . "Total: *\$" . number_format($pedido->total, 2) . "*\n\n"
-                 . "¡Gracias por su preferencia! 🙏";
+                 . "📅 *Entrega estimada:* {$fechaStr}\n\n"
+                 . "💵 Total: *\$" . number_format($pedido->total, 2) . "*";
         } else {
             $msg = "🧺 *{$negocio}*\n\n"
                  . "Hola *{$nombre}*, su pedido *{$folio}* está listo para recoger. ✅\n\n"
-                 . "📅 Puede pasar desde: {$entrega}\n\n"
-                 . "Total a pagar: *\$" . number_format($pedido->total, 2) . "*\n\n"
-                 . "¡Le esperamos! 🙏";
+                 . "📅 *Puede pasar desde:* {$fechaStr}\n\n"
+                 . "💵 Total a pagar: *\$" . number_format($pedido->total, 2) . "*";
         }
+
+        // Agregar horarios de atención si están configurados
+        if ($horarios) {
+            $msg .= "\n\n🕐 *Nuestros horarios:*\n" . $horarios;
+        }
+
+        $msg .= "\n\n¡Le esperamos! 🙏";
 
         return $this->enviarMensaje($telefono, $msg);
     }

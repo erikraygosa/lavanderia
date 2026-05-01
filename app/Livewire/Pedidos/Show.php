@@ -14,10 +14,29 @@ class Show extends Component
     public bool   $enviandoWhatsapp  = false;
     public string $mensajeWhatsapp   = '';
 
+    // Formulario inline para notificar al cliente
+    public bool   $mostrarFormNotificar = false;
+    public string $notificarFecha       = '';
+    public string $notificarHora        = '';
+
     public function mount(Pedido $pedido): void
     {
         $this->pedido     = $pedido->load('items', 'cliente');
         $this->metodoPago = $pedido->metodo_pago ?? 'efectivo';
+    }
+
+    /** Abre el formulario pre-llenado con la fecha/hora de entrega del pedido */
+    public function abrirFormNotificar(): void
+    {
+        $this->notificarFecha = $this->pedido->fecha_entrega
+            ? $this->pedido->fecha_entrega->format('Y-m-d')
+            : now()->format('Y-m-d');
+
+        $this->notificarHora = $this->pedido->hora_entrega
+            ? substr($this->pedido->hora_entrega, 0, 5)
+            : now()->format('H:i');
+
+        $this->mostrarFormNotificar = true;
     }
 
     // ── Cambios de estado ────────────────────────────────────────────────────
@@ -106,7 +125,7 @@ class Show extends Component
         $this->enviandoWhatsapp = false;
     }
 
-    /** Notifica al cliente que su pedido está listo */
+    /** Notifica al cliente que su pedido está listo (con fecha/hora editada) */
     public function notificarListo(): void
     {
         $this->mensajeWhatsapp = '';
@@ -115,6 +134,15 @@ class Show extends Component
             $this->mensajeWhatsapp = '⚠️ El cliente no tiene teléfono registrado.';
             return;
         }
+
+        $this->validate([
+            'notificarFecha' => 'required|date',
+            'notificarHora'  => 'required',
+        ], [
+            'notificarFecha.required' => 'La fecha es obligatoria.',
+            'notificarFecha.date'     => 'Formato de fecha inválido.',
+            'notificarHora.required'  => 'La hora es obligatoria.',
+        ]);
 
         $this->enviandoWhatsapp = true;
 
@@ -127,11 +155,19 @@ class Show extends Component
                 return;
             }
 
-            $ok = $service->notificarListo($this->pedido);
+            $ok = $service->notificarListo(
+                $this->pedido,
+                $this->notificarFecha,
+                $this->notificarHora
+            );
 
             $this->mensajeWhatsapp = $ok
                 ? '✅ Notificación enviada al cliente.'
                 : '❌ Error al enviar: ' . $service->ultimoError;
+
+            if ($ok) {
+                $this->mostrarFormNotificar = false;
+            }
 
         } catch (\Exception $e) {
             $this->mensajeWhatsapp = '❌ Excepción: ' . $e->getMessage();

@@ -71,6 +71,12 @@
                 <p class="text-xs text-gray-400 mt-1">Aparecerá como código QR al pie del ticket.</p>
             </div>
             <div>
+                <label class="label-field">🕐 Horarios de atención</label>
+                <textarea wire:model="horariosTrabajo" rows="4" class="input-field resize-none font-mono text-xs"
+                          placeholder="Lunes a Viernes: 8:00 - 20:00&#10;Sábado: 9:00 - 18:00&#10;Domingo: Cerrado"></textarea>
+                <p class="text-xs text-gray-400 mt-1">Se incluye al final del mensaje de WhatsApp "pedido listo".</p>
+            </div>
+            <div>
                 <label class="label-field">Mensaje promocional en tickets</label>
                 <textarea wire:model="ticketMensaje" rows="2" class="input-field resize-none"
                           placeholder="Ej: ¡Los lunes 20% de descuento en edredones!"></textarea>

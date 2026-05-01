@@ -22,8 +22,9 @@ class Index extends Component
     public string $negocioDireccion= '';
 
     // Ticket
-    public string $ticketMensaje  = '';
-    public string $facebookUrl    = '';
+    public string $ticketMensaje    = '';
+    public string $facebookUrl      = '';
+    public string $horariosTrabajo  = '';
 
     // Logo
     public $logoArchivo  = null;   // archivo temporal Livewire
@@ -44,6 +45,7 @@ class Index extends Component
         $this->logoPath         = Configuracion::obtener('logo_path', '');
         $this->ticketMensaje    = Configuracion::obtener('ticket_mensaje', '');
         $this->facebookUrl      = Configuracion::obtener('facebook_url', '');
+        $this->horariosTrabajo  = Configuracion::obtener('horarios_trabajo', '');
     }
 
     public function guardar(): void
@@ -79,6 +81,7 @@ class Index extends Component
         Configuracion::establecer('negocio_direccion', $this->negocioDireccion);
         Configuracion::establecer('ticket_mensaje',    $this->ticketMensaje);
         Configuracion::establecer('facebook_url',      $this->facebookUrl);
+        Configuracion::establecer('horarios_trabajo',  $this->horariosTrabajo);
 
         $this->mensajeExito = 'Configuración guardada correctamente.';
         $this->mensajeError = '';
