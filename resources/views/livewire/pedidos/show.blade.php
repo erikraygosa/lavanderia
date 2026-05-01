@@ -1,10 +1,10 @@
 <div>
     @if (session('exito'))
-        <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">{{ session('exito') }}</div>
+        <div class="mb-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg text-green-700 dark:text-green-300 text-sm">{{ session('exito') }}</div>
     @endif
 
     @if($mensajeWhatsapp)
-        <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">{{ $mensajeWhatsapp }}</div>
+        <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg text-blue-700 dark:text-blue-300 text-sm">{{ $mensajeWhatsapp }}</div>
     @endif
 
     {{-- Header --}}
@@ -42,18 +42,18 @@
             <div class="card">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Cliente</p>
-                        <p class="font-semibold text-gray-900 text-lg">{{ $pedido->cliente->nombre }}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Cliente</p>
+                        <p class="font-semibold text-gray-900 dark:text-white text-lg">{{ $pedido->cliente->nombre }}</p>
                         @if($pedido->cliente->telefono)
-                            <p class="text-gray-500 text-sm">{{ $pedido->cliente->telefono }}</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">{{ $pedido->cliente->telefono }}</p>
                         @endif
                         @if($pedido->cliente->email)
-                            <p class="text-gray-500 text-sm">{{ $pedido->cliente->email }}</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">{{ $pedido->cliente->email }}</p>
                         @endif
                     </div>
                     <div class="text-right flex-shrink-0">
-                        <p class="text-xs text-gray-400 mb-1">Entrega</p>
-                        <p class="font-medium text-gray-900 text-sm">{{ $pedido->entregaFormateada() }}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mb-1">Entrega</p>
+                        <p class="font-medium text-gray-900 dark:text-gray-100 text-sm">{{ $pedido->entregaFormateada() }}</p>
                         @if($pedido->es_domicilio)
                             <span class="inline-flex items-center gap-1 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full mt-1">
                                 🛵 Domicilio
@@ -81,46 +81,46 @@
             {{-- Items --}}
             <div class="card p-0 overflow-hidden">
                 <table class="w-full text-sm">
-                    <thead class="bg-gray-50 border-b border-gray-200">
+                    <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
                         <tr>
-                            <th class="text-left px-4 py-3 font-medium text-gray-600">Concepto</th>
-                            <th class="text-center px-4 py-3 font-medium text-gray-600">Cant.</th>
-                            <th class="text-right px-4 py-3 font-medium text-gray-600">Precio</th>
-                            <th class="text-right px-4 py-3 font-medium text-gray-600">Subtotal</th>
+                            <th class="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Concepto</th>
+                            <th class="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Cant.</th>
+                            <th class="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Precio</th>
+                            <th class="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Subtotal</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         @foreach($pedido->items as $item)
-                            <tr>
+                            <tr class="dark:hover:bg-gray-700/30">
                                 <td class="px-4 py-3">
-                                    <p class="font-medium text-gray-900">{{ $item->descripcion }}</p>
-                                    <span class="text-xs {{ $item->tipo === 'servicio' ? 'text-blue-600' : 'text-amber-600' }}">{{ ucfirst($item->tipo) }}</span>
+                                    <p class="font-medium text-gray-900 dark:text-gray-100">{{ $item->descripcion }}</p>
+                                    <span class="text-xs {{ $item->tipo === 'servicio' ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400' }}">{{ ucfirst($item->tipo) }}</span>
                                 </td>
-                                <td class="px-4 py-3 text-center text-gray-700">{{ $item->cantidad + 0 }}</td>
-                                <td class="px-4 py-3 text-right text-gray-700">${{ number_format($item->precio_unitario, 2) }}</td>
-                                <td class="px-4 py-3 text-right font-medium text-gray-900">${{ number_format($item->subtotal, 2) }}</td>
+                                <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300">{{ $item->cantidad + 0 }}</td>
+                                <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300">${{ number_format($item->precio_unitario, 2) }}</td>
+                                <td class="px-4 py-3 text-right font-medium text-gray-900 dark:text-gray-100">${{ number_format($item->subtotal, 2) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
-                    <tfoot class="bg-gray-50 border-t border-gray-200">
+                    <tfoot class="bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
                         <tr>
-                            <td colspan="3" class="px-4 py-2 text-right text-sm text-gray-600">Subtotal</td>
-                            <td class="px-4 py-2 text-right font-medium">${{ number_format($pedido->subtotal, 2) }}</td>
+                            <td colspan="3" class="px-4 py-2 text-right text-sm text-gray-600 dark:text-gray-400">Subtotal</td>
+                            <td class="px-4 py-2 text-right font-medium dark:text-gray-200">${{ number_format($pedido->subtotal, 2) }}</td>
                         </tr>
                         @if($pedido->descuento > 0)
                         <tr>
-                            <td colspan="3" class="px-4 py-2 text-right text-sm text-gray-600">
+                            <td colspan="3" class="px-4 py-2 text-right text-sm text-gray-600 dark:text-gray-400">
                                 Descuento
                                 @if($pedido->descuento_nota)
                                     <span class="block text-xs text-gray-400 italic">{{ $pedido->descuento_nota }}</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-2 text-right text-red-600 font-medium">-${{ number_format($pedido->descuento, 2) }}</td>
+                            <td class="px-4 py-2 text-right text-red-600 dark:text-red-400 font-medium">-${{ number_format($pedido->descuento, 2) }}</td>
                         </tr>
                         @endif
-                        <tr class="border-t border-gray-200">
-                            <td colspan="3" class="px-4 py-3 text-right font-semibold text-gray-900">Total</td>
-                            <td class="px-4 py-3 text-right font-bold text-lg text-indigo-700">${{ number_format($pedido->total, 2) }}</td>
+                        <tr class="border-t border-gray-200 dark:border-gray-700">
+                            <td colspan="3" class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">Total</td>
+                            <td class="px-4 py-3 text-right font-bold text-lg text-indigo-700 dark:text-indigo-400">${{ number_format($pedido->total, 2) }}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -132,7 +132,7 @@
 
             {{-- Estado y acciones --}}
             <div class="card">
-                <p class="text-xs text-gray-400 uppercase tracking-wider mb-2">Estado</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Estado</p>
                 @php $badge = $pedido->estadoBadge(); @endphp
                 <span class="badge-{{ $pedido->estado }} text-sm px-3 py-1">
                     {{ $badge['icon'] }} {{ $badge['texto'] }}
@@ -141,13 +141,12 @@
                 {{-- PENDIENTE --}}
                 @if($pedido->estado === 'pendiente')
                     <div class="mt-4 space-y-2">
-                        <button wire:click="marcarTerminado"
-                                class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors">
+                        <button wire:click="marcarTerminado" class="btn-accion-azul">
                             ✅ Marcar como listo
                         </button>
                         <button wire:click="marcarAbandonado"
                                 wire:confirm="¿Marcar como abandonado?"
-                                class="btn-secondary w-full justify-center text-red-600 hover:text-red-700 text-sm">
+                                class="btn-accion-rojo opacity-80">
                             ❌ Marcar abandonado
                         </button>
                     </div>
@@ -155,14 +154,13 @@
 
                 {{-- TERMINADO (listo) --}}
                 @if($pedido->estado === 'terminado')
-                    <div class="mt-3 text-xs text-gray-500">
-                        Listo el: <strong>{{ $pedido->terminado_en?->format('d/m/Y H:i') }}</strong>
+                    <div class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                        Listo el: <strong class="dark:text-gray-300">{{ $pedido->terminado_en?->format('d/m/Y H:i') }}</strong>
                     </div>
                     <div class="mt-4 space-y-2">
                         {{-- Notificar al cliente --}}
-                        <button wire:click="notificarListo"
-                                wire:loading.attr="disabled"
-                                class="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors">
+                        <button wire:click="notificarListo" wire:loading.attr="disabled"
+                                class="btn-accion-verde">
                             <svg wire:loading wire:target="notificarListo" class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
@@ -171,27 +169,26 @@
                         </button>
 
                         {{-- Marcar entregado --}}
-                        <button wire:click="marcarEntregado"
-                                class="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors">
+                        <button wire:click="marcarEntregado" class="btn-accion-morado">
                             📦 Marcar como entregado
                         </button>
 
                         {{-- Cobrar --}}
-                        <div class="pt-2 border-t border-gray-100 space-y-2">
-                            <p class="text-xs font-medium text-gray-600">Cobrar ahora</p>
+                        <div class="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-2">
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Cobrar ahora</p>
                             <select wire:model="metodoPago" class="input-field">
                                 <option value="efectivo">Efectivo</option>
                                 <option value="tarjeta">Tarjeta</option>
                                 <option value="transferencia">Transferencia</option>
                                 <option value="otro">Otro</option>
                             </select>
-                            <button wire:click="marcarPagado" class="btn-primary w-full justify-center">
+                            <button wire:click="marcarPagado" class="btn-accion-indigo">
                                 💵 Cobrar pedido
                             </button>
                         </div>
 
                         <button wire:click="marcarPendiente"
-                                class="text-xs text-gray-400 hover:text-gray-600 w-full text-center mt-1">
+                                class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 w-full text-center mt-1">
                             Revertir a pendiente
                         </button>
                     </div>
@@ -199,34 +196,34 @@
 
                 {{-- ENTREGADO --}}
                 @if($pedido->estado === 'entregado')
-                    <div class="mt-3 space-y-1 text-xs text-gray-500">
+                    <div class="mt-3 space-y-1 text-xs text-gray-500 dark:text-gray-400">
                         @if($pedido->terminado_en)
-                            <p>Listo el: <strong>{{ $pedido->terminado_en->format('d/m/Y H:i') }}</strong></p>
+                            <p>Listo el: <strong class="dark:text-gray-300">{{ $pedido->terminado_en->format('d/m/Y H:i') }}</strong></p>
                         @endif
-                        <p>Entregado el: <strong>{{ $pedido->entregado_en?->format('d/m/Y H:i') }}</strong></p>
+                        <p>Entregado el: <strong class="dark:text-gray-300">{{ $pedido->entregado_en?->format('d/m/Y H:i') }}</strong></p>
                         @if($pedido->pagado_en)
-                            <p>Pagado el: <strong>{{ $pedido->pagado_en->format('d/m/Y H:i') }}</strong></p>
+                            <p>Pagado el: <strong class="dark:text-gray-300">{{ $pedido->pagado_en->format('d/m/Y H:i') }}</strong></p>
                             @if($pedido->metodo_pago)
-                                <p>Método: <strong>{{ ucfirst($pedido->metodo_pago) }}</strong></p>
+                                <p>Método: <strong class="dark:text-gray-300">{{ ucfirst($pedido->metodo_pago) }}</strong></p>
                             @endif
                         @endif
                     </div>
                     @if(!$pedido->pagado_en)
                     <div class="mt-4 space-y-2">
-                        <p class="text-xs font-medium text-gray-600">Registrar pago</p>
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Registrar pago</p>
                         <select wire:model="metodoPago" class="input-field">
                             <option value="efectivo">Efectivo</option>
                             <option value="tarjeta">Tarjeta</option>
                             <option value="transferencia">Transferencia</option>
                             <option value="otro">Otro</option>
                         </select>
-                        <button wire:click="marcarPagado" class="btn-primary w-full justify-center">
+                        <button wire:click="marcarPagado" class="btn-accion-indigo">
                             💵 Cobrar pedido
                         </button>
                     </div>
                     @endif
                     <button wire:click="marcarPendiente"
-                            class="mt-3 text-xs text-gray-400 hover:text-gray-600 w-full text-center block">
+                            class="mt-3 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 w-full text-center block">
                         Revertir a pendiente
                     </button>
                 @endif
@@ -235,20 +232,25 @@
                 @if($pedido->estado === 'pagado')
                     <div class="mt-3 text-sm space-y-1">
                         @if($pedido->terminado_en)
-                            <p class="text-xs text-gray-500">Listo el: <strong>{{ $pedido->terminado_en->format('d/m/Y H:i') }}</strong></p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                Listo el: <strong class="dark:text-gray-300">{{ $pedido->terminado_en->format('d/m/Y H:i') }}</strong>
+                            </p>
                         @endif
-                        <p class="text-gray-600">Pagado el: <strong>{{ $pedido->pagado_en?->format('d/m/Y H:i') }}</strong></p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            Pagado el: <strong class="dark:text-gray-300">{{ $pedido->pagado_en?->format('d/m/Y H:i') }}</strong>
+                        </p>
                         @if($pedido->metodo_pago)
-                            <p class="text-gray-600">Método: <strong>{{ ucfirst($pedido->metodo_pago) }}</strong></p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                Método: <strong class="dark:text-gray-300">{{ ucfirst($pedido->metodo_pago) }}</strong>
+                            </p>
                         @endif
                     </div>
                     <div class="mt-4 space-y-2">
-                        <button wire:click="marcarEntregado"
-                                class="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors">
+                        <button wire:click="marcarEntregado" class="btn-accion-morado">
                             📦 Marcar como entregado
                         </button>
                         <button wire:click="marcarPendiente"
-                                class="text-xs text-gray-400 hover:text-gray-600 w-full text-center">
+                                class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 w-full text-center">
                             Revertir a pendiente
                         </button>
                     </div>
@@ -257,8 +259,8 @@
                 {{-- ABANDONADO --}}
                 @if($pedido->estado === 'abandonado')
                     <div class="mt-3">
-                        <button wire:click="marcarPendiente" class="btn-secondary w-full justify-center text-sm">
-                            Reactivar pedido
+                        <button wire:click="marcarPendiente" class="btn-accion-azul">
+                            ♻️ Reactivar pedido
                         </button>
                     </div>
                 @endif
@@ -266,8 +268,8 @@
 
             {{-- Total --}}
             <div class="card text-center">
-                <p class="text-2xl font-bold text-indigo-700">${{ number_format($pedido->total, 2) }}</p>
-                <p class="text-sm text-gray-500 mt-1">Total del pedido</p>
+                <p class="text-2xl font-bold text-indigo-700 dark:text-indigo-400">${{ number_format($pedido->total, 2) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total del pedido</p>
                 @if($pedido->es_domicilio)
                     <span class="inline-block mt-2 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
                         🛵 Envío a domicilio

@@ -1,23 +1,33 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Lavandería' }}</title>
+    {{-- Evita flash de modo claro al cargar en dark mode --}}
+    <script>if(localStorage.getItem('darkMode')==='true')document.getElementById('html-root').classList.add('dark')</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 dark:bg-gray-900">
 
 @php
     $logoPath   = \App\Models\Configuracion::obtener('logo_path', '');
     $negocioNom = \App\Models\Configuracion::obtener('negocio_nombre', 'Lavandería');
 @endphp
 
-<div class="flex h-screen overflow-hidden" x-data="{ sidebarOpen: false }">
+<div class="flex h-screen overflow-hidden" x-data="{
+    sidebarOpen: false,
+    darkMode: localStorage.getItem('darkMode') === 'true',
+    toggleDark() {
+        this.darkMode = !this.darkMode;
+        localStorage.setItem('darkMode', this.darkMode);
+        document.getElementById('html-root').classList.toggle('dark', this.darkMode);
+    }
+}">
 
     {{-- Overlay móvil --}}
     <div x-show="sidebarOpen"
@@ -190,25 +200,46 @@
     {{-- Main content --}}
     <div class="flex-1 flex flex-col overflow-hidden min-w-0">
         {{-- Top bar --}}
-        <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between flex-shrink-0">
+        <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between flex-shrink-0">
             <div class="flex items-center gap-3">
                 {{-- Hamburger solo en móvil/tablet --}}
                 <button @click="sidebarOpen = true"
-                        class="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
+                        class="lg:hidden text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
-                <h1 class="text-base sm:text-lg font-semibold text-gray-900 truncate">{{ $title ?? 'Dashboard' }}</h1>
+                <h1 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">{{ $title ?? 'Dashboard' }}</h1>
             </div>
-            <span class="text-xs sm:text-sm text-gray-500 hidden sm:block">
-                {{ now()->isoFormat('dddd D [de] MMMM') }}
-            </span>
+            <div class="flex items-center gap-3">
+                <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+                    {{ now()->isoFormat('dddd D [de] MMMM') }}
+                </span>
+
+                {{-- Toggle modo oscuro --}}
+                <button @click="toggleDark()"
+                        title="Cambiar tema"
+                        class="w-9 h-9 flex items-center justify-center rounded-lg
+                               bg-gray-100 dark:bg-gray-700
+                               text-gray-600 dark:text-yellow-300
+                               hover:bg-gray-200 dark:hover:bg-gray-600
+                               transition-colors">
+                    {{-- Sol (visible en modo claro) --}}
+                    <svg x-show="!darkMode" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+                    </svg>
+                    {{-- Luna (visible en modo oscuro) --}}
+                    <svg x-show="darkMode" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                    </svg>
+                </button>
+            </div>
         </header>
 
         {{-- Page content --}}
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6">
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50 dark:bg-gray-900">
             {{ $slot }}
         </main>
     </div>
