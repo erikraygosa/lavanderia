@@ -144,36 +144,9 @@
 </div>
 
 {{-- ════════════════════════════════════════════════════════════════════════ --}}
-{{-- COPIA 1 — ORIGINAL (tienda)                                             --}}
+{{-- COPIA 1 — CLIENTE (sale primero para entregar rápido)                   --}}
 {{-- ════════════════════════════════════════════════════════════════════════ --}}
 <div class="copia copia-original">
-    <p class="etiqueta-copia">— ORIGINAL —</p>
-
-    @include('pedidos._ticket-cuerpo', [
-        'logoB64'         => $logoB64,
-        'logoMime'        => $logoMime,
-        'negocioNom'      => $negocioNom,
-        'negocioDir'      => $negocioDir,
-        'negocioTel'      => $negocioTel,
-        'pedido'          => $pedido,
-        'ticketMensaje'   => $ticketMensaje,
-        'facebookUrl'     => $facebookUrl,
-        'horariosTrabajo' => $horariosTrabajo,
-        'mostrarQr'       => false,
-    ])
-</div>
-
-{{-- ── Línea de corte ──────────────────────────────────────────────────── --}}
-<div class="corte">
-    <div class="corte-linea"></div>
-    <span>✂</span>
-    <div class="corte-linea"></div>
-</div>
-
-{{-- ════════════════════════════════════════════════════════════════════════ --}}
-{{-- COPIA 2 — CLIENTE                                                       --}}
-{{-- ════════════════════════════════════════════════════════════════════════ --}}
-<div class="copia">
     <p class="etiqueta-copia">— COPIA CLIENTE —</p>
 
     @include('pedidos._ticket-cuerpo', [
@@ -187,6 +160,33 @@
         'facebookUrl'     => $facebookUrl,
         'horariosTrabajo' => $horariosTrabajo,
         'mostrarQr'       => true,
+    ])
+</div>
+
+{{-- ── Línea de corte ──────────────────────────────────────────────────── --}}
+<div class="corte">
+    <div class="corte-linea"></div>
+    <span>✂</span>
+    <div class="corte-linea"></div>
+</div>
+
+{{-- ════════════════════════════════════════════════════════════════════════ --}}
+{{-- COPIA 2 — ORIGINAL (tienda, queda en la bobina)                         --}}
+{{-- ════════════════════════════════════════════════════════════════════════ --}}
+<div class="copia">
+    <p class="etiqueta-copia">— ORIGINAL —</p>
+
+    @include('pedidos._ticket-cuerpo', [
+        'logoB64'         => $logoB64,
+        'logoMime'        => $logoMime,
+        'negocioNom'      => $negocioNom,
+        'negocioDir'      => $negocioDir,
+        'negocioTel'      => $negocioTel,
+        'pedido'          => $pedido,
+        'ticketMensaje'   => $ticketMensaje,
+        'facebookUrl'     => $facebookUrl,
+        'horariosTrabajo' => $horariosTrabajo,
+        'mostrarQr'       => false,
     ])
 </div>
 
