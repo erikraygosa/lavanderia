@@ -221,17 +221,45 @@
                             📦 Marcar como entregado
                         </button>
 
-                        {{-- Cobrar --}}
+                        {{-- Cobrar / Abonar --}}
                         <div class="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-2">
-                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Cobrar ahora</p>
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Cobrar</p>
+
+                            {{-- Resumen anticipo si ya tiene abono --}}
+                            @if($pedido->tieneAnticipo())
+                            <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2 text-xs space-y-0.5">
+                                <div class="flex justify-between text-gray-600 dark:text-gray-400">
+                                    <span>Anticipo pagado:</span>
+                                    <span class="font-semibold text-amber-700 dark:text-amber-400">${{ number_format($pedido->anticipo, 2) }}</span>
+                                </div>
+                                <div class="flex justify-between font-bold text-gray-800 dark:text-gray-200">
+                                    <span>Saldo pendiente:</span>
+                                    <span class="text-red-600 dark:text-red-400">${{ number_format($pedido->saldoPendiente(), 2) }}</span>
+                                </div>
+                            </div>
+                            @endif
+
+                            <div>
+                                <label class="text-xs text-gray-500 dark:text-gray-400 mb-0.5 block">Monto a cobrar</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                                    <input wire:model="montoAbono" type="number" step="0.01" min="0.01"
+                                           max="{{ $pedido->saldoPendiente() }}"
+                                           class="input-field pl-7"
+                                           placeholder="{{ number_format($pedido->saldoPendiente(), 2) }}" />
+                                </div>
+                                @error('montoAbono') <p class="text-red-500 text-xs mt-0.5">{{ $message }}</p> @enderror
+                            </div>
+
                             <select wire:model="metodoPago" class="input-field">
                                 <option value="efectivo">Efectivo</option>
                                 <option value="tarjeta">Tarjeta</option>
                                 <option value="transferencia">Transferencia</option>
                                 <option value="otro">Otro</option>
                             </select>
-                            <button wire:click="marcarPagado" class="btn-accion-indigo">
-                                💵 Cobrar pedido
+
+                            <button wire:click="cobrar" class="btn-accion-indigo">
+                                💵 {{ $pedido->tieneAnticipo() ? 'Registrar abono / liquidar' : 'Cobrar pedido' }}
                             </button>
                         </div>
 
@@ -259,14 +287,32 @@
                     @if(!$pedido->pagado_en)
                     <div class="mt-4 space-y-2">
                         <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Registrar pago</p>
+                        @if($pedido->tieneAnticipo())
+                        <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2 text-xs space-y-0.5">
+                            <div class="flex justify-between text-gray-600 dark:text-gray-400">
+                                <span>Anticipo pagado:</span>
+                                <span class="font-semibold text-amber-700 dark:text-amber-400">${{ number_format($pedido->anticipo, 2) }}</span>
+                            </div>
+                            <div class="flex justify-between font-bold text-gray-800 dark:text-gray-200">
+                                <span>Saldo pendiente:</span>
+                                <span class="text-red-600 dark:text-red-400">${{ number_format($pedido->saldoPendiente(), 2) }}</span>
+                            </div>
+                        </div>
+                        @endif
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                            <input wire:model="montoAbono" type="number" step="0.01" min="0.01"
+                                   class="input-field pl-7"
+                                   placeholder="{{ number_format($pedido->saldoPendiente(), 2) }}" />
+                        </div>
                         <select wire:model="metodoPago" class="input-field">
                             <option value="efectivo">Efectivo</option>
                             <option value="tarjeta">Tarjeta</option>
                             <option value="transferencia">Transferencia</option>
                             <option value="otro">Otro</option>
                         </select>
-                        <button wire:click="marcarPagado" class="btn-accion-indigo">
-                            💵 Cobrar pedido
+                        <button wire:click="cobrar" class="btn-accion-indigo">
+                            💵 {{ $pedido->tieneAnticipo() ? 'Registrar abono / liquidar' : 'Cobrar pedido' }}
                         </button>
                     </div>
                     @endif
@@ -294,6 +340,45 @@
                         @endif
                     </div>
                     <div class="mt-4 space-y-2">
+                        {{-- Notificar que está listo (pagado pero aún no entregado) --}}
+                        @if(!$mostrarFormNotificar)
+                            <button wire:click="abrirFormNotificar" class="btn-accion-verde">
+                                💬 Notificar al cliente (WhatsApp)
+                            </button>
+                        @else
+                            <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl p-3 space-y-2">
+                                <p class="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                                    💬 Confirmar hora de recogida
+                                </p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="text-xs text-gray-500 dark:text-gray-400 mb-0.5 block">Fecha</label>
+                                        <input wire:model="notificarFecha" type="date" class="input-field text-xs py-1.5" />
+                                        @error('notificarFecha') <p class="text-red-500 text-xs mt-0.5">{{ $message }}</p> @enderror
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 dark:text-gray-400 mb-0.5 block">Hora</label>
+                                        <input wire:model="notificarHora" type="time" class="input-field text-xs py-1.5" />
+                                        @error('notificarHora') <p class="text-red-500 text-xs mt-0.5">{{ $message }}</p> @enderror
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 pt-1">
+                                    <button wire:click="notificarListo" wire:loading.attr="disabled"
+                                            class="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2 rounded-lg transition-colors">
+                                        <svg wire:loading wire:target="notificarListo" class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                        </svg>
+                                        Enviar WhatsApp
+                                    </button>
+                                    <button wire:click="$set('mostrarFormNotificar', false)"
+                                            class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
+
                         <button wire:click="marcarEntregado" class="btn-accion-morado">
                             📦 Marcar como entregado
                         </button>
@@ -318,6 +403,18 @@
             <div class="card text-center">
                 <p class="text-2xl font-bold text-indigo-700 dark:text-indigo-400">${{ number_format($pedido->total, 2) }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total del pedido</p>
+                @if($pedido->tieneAnticipo() && $pedido->estado !== 'pagado')
+                <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs space-y-1">
+                    <div class="flex justify-between text-gray-500 dark:text-gray-400">
+                        <span>Anticipo:</span>
+                        <span class="font-semibold text-amber-600">${{ number_format($pedido->anticipo, 2) }}</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-gray-800 dark:text-gray-200">
+                        <span>Saldo:</span>
+                        <span class="text-red-600 dark:text-red-400">${{ number_format($pedido->saldoPendiente(), 2) }}</span>
+                    </div>
+                </div>
+                @endif
                 @if($pedido->es_domicilio)
                     <span class="inline-block mt-2 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
                         🛵 Envío a domicilio

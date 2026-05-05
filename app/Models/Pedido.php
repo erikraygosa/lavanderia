@@ -13,6 +13,7 @@ class Pedido extends Model
         'fecha_entrega', 'hora_entrega',
         'es_domicilio', 'direccion_domicilio',
         'subtotal', 'descuento', 'descuento_nota', 'total',
+        'anticipo', 'anticipo_metodo',
         'metodo_pago', 'notas',
         'pagado_en', 'terminado_en', 'entregado_en',
     ];
@@ -25,8 +26,21 @@ class Pedido extends Model
         'subtotal'       => 'decimal:2',
         'descuento'      => 'decimal:2',
         'total'          => 'decimal:2',
+        'anticipo'       => 'decimal:2',
         'es_domicilio'   => 'boolean',
     ];
+
+    /** Cuánto falta por cobrar */
+    public function saldoPendiente(): float
+    {
+        return max(0, (float) $this->total - (float) $this->anticipo);
+    }
+
+    /** ¿Ya tiene al menos un abono registrado? */
+    public function tieneAnticipo(): bool
+    {
+        return (float) $this->anticipo > 0;
+    }
 
     public function entregaFormateada(): string
     {

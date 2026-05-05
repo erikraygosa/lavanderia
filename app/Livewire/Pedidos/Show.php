@@ -11,6 +11,7 @@ class Show extends Component
     public Pedido $pedido;
 
     public string $metodoPago        = 'efectivo';
+    public float  $montoAbono        = 0;
     public bool   $enviandoWhatsapp  = false;
     public string $mensajeWhatsapp   = '';
 
@@ -23,6 +24,7 @@ class Show extends Component
     {
         $this->pedido     = $pedido->load('items', 'cliente');
         $this->metodoPago = $pedido->metodo_pago ?? 'efectivo';
+        $this->montoAbono = $pedido->saldoPendiente();
     }
 
     /** Abre el formulario pre-llenado con la fecha/hora de entrega del pedido */
@@ -61,26 +63,72 @@ class Show extends Component
         session()->flash('exito', 'Pedido marcado como entregado.');
     }
 
+    /**
+     * Registra un cobro (parcial = abono, total = liquidación).
+     * Si el monto cubre el saldo pendiente, el pedido pasa a "pagado".
+     */
+    public function cobrar(): void
+    {
+        $this->validate([
+            'montoAbono' => 'required|numeric|min:0.01|max:' . ($this->pedido->saldoPendiente() + 0.001),
+        ], [
+            'montoAbono.required' => 'Ingresa un monto.',
+            'montoAbono.numeric'  => 'Debe ser un número.',
+            'montoAbono.min'      => 'El monto debe ser mayor a $0.',
+            'montoAbono.max'      => 'El monto no puede superar el saldo pendiente.',
+        ]);
+
+        $nuevoAnticipo = (float) $this->pedido->anticipo + $this->montoAbono;
+        $liquidado     = $nuevoAnticipo >= (float) $this->pedido->total;
+
+        $datos = [
+            'anticipo'        => $nuevoAnticipo,
+            'anticipo_metodo' => $this->metodoPago,
+        ];
+
+        if ($liquidado) {
+            $datos['estado']      = 'pagado';
+            $datos['metodo_pago'] = $this->metodoPago;
+            $datos['pagado_en']   = now();
+            $mensaje = '✅ Pedido liquidado correctamente.';
+        } else {
+            $saldoRestante = $this->pedido->total - $nuevoAnticipo;
+            $mensaje = '💰 Abono de $' . number_format($this->montoAbono, 2)
+                     . ' registrado. Saldo: $' . number_format($saldoRestante, 2);
+        }
+
+        $this->pedido->update($datos);
+        $this->pedido->refresh();
+        $this->montoAbono = $this->pedido->saldoPendiente();
+        session()->flash('exito', $mensaje);
+    }
+
+    /** Compatibilidad: liquidar directamente desde estado entregado */
     public function marcarPagado(): void
     {
         $this->pedido->update([
             'estado'      => 'pagado',
             'metodo_pago' => $this->metodoPago,
             'pagado_en'   => now(),
+            'anticipo'    => $this->pedido->total,
         ]);
         $this->pedido->refresh();
+        $this->montoAbono = 0;
         session()->flash('exito', 'Pedido marcado como pagado.');
     }
 
     public function marcarPendiente(): void
     {
         $this->pedido->update([
-            'estado'       => 'pendiente',
-            'pagado_en'    => null,
-            'terminado_en' => null,
-            'entregado_en' => null,
+            'estado'          => 'pendiente',
+            'pagado_en'       => null,
+            'terminado_en'    => null,
+            'entregado_en'    => null,
+            'anticipo'        => 0,
+            'anticipo_metodo' => null,
         ]);
         $this->pedido->refresh();
+        $this->montoAbono = $this->pedido->saldoPendiente();
     }
 
     public function marcarAbandonado(): void
