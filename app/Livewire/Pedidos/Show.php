@@ -15,6 +15,9 @@ class Show extends Component
     public bool   $enviandoWhatsapp  = false;
     public string $mensajeWhatsapp   = '';
 
+    // Formulario inline para registrar abono
+    public bool  $mostrarFormAbono = false;
+
     // Formulario inline para notificar al cliente
     public bool   $mostrarFormNotificar = false;
     public string $notificarFecha       = '';
@@ -25,6 +28,20 @@ class Show extends Component
         $this->pedido     = $pedido->load('items', 'cliente');
         $this->metodoPago = $pedido->metodo_pago ?? 'efectivo';
         $this->montoAbono = $pedido->saldoPendiente();
+    }
+
+    /** Abre el formulario de abono con monto vacío */
+    public function abrirFormAbono(): void
+    {
+        $this->montoAbono      = 0;
+        $this->mostrarFormAbono = true;
+    }
+
+    /** Liquida el saldo completo de una vez */
+    public function liquidarTodo(): void
+    {
+        $this->montoAbono = $this->pedido->saldoPendiente();
+        $this->cobrar();
     }
 
     /** Abre el formulario pre-llenado con la fecha/hora de entrega del pedido */
@@ -99,7 +116,8 @@ class Show extends Component
 
         $this->pedido->update($datos);
         $this->pedido->refresh();
-        $this->montoAbono = $this->pedido->saldoPendiente();
+        $this->montoAbono       = $this->pedido->saldoPendiente();
+        $this->mostrarFormAbono = false;
         session()->flash('exito', $mensaje);
     }
 

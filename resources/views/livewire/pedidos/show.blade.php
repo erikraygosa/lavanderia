@@ -223,44 +223,69 @@
 
                         {{-- Cobrar / Abonar --}}
                         <div class="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-2">
-                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Cobrar</p>
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Cobro</p>
 
-                            {{-- Resumen anticipo si ya tiene abono --}}
+                            {{-- Resumen anticipo si ya hay abono --}}
                             @if($pedido->tieneAnticipo())
                             <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2 text-xs space-y-0.5">
-                                <div class="flex justify-between text-gray-600 dark:text-gray-400">
-                                    <span>Anticipo pagado:</span>
+                                <div class="flex justify-between text-gray-500 dark:text-gray-400">
+                                    <span>Anticipo:</span>
                                     <span class="font-semibold text-amber-700 dark:text-amber-400">${{ number_format($pedido->anticipo, 2) }}</span>
                                 </div>
-                                <div class="flex justify-between font-bold text-gray-800 dark:text-gray-200">
-                                    <span>Saldo pendiente:</span>
+                                <div class="flex justify-between font-bold">
+                                    <span class="text-gray-700 dark:text-gray-200">Saldo:</span>
                                     <span class="text-red-600 dark:text-red-400">${{ number_format($pedido->saldoPendiente(), 2) }}</span>
                                 </div>
                             </div>
                             @endif
 
-                            <div>
-                                <label class="text-xs text-gray-500 dark:text-gray-400 mb-0.5 block">Monto a cobrar</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                                    <input wire:model="montoAbono" type="number" step="0.01" min="0.01"
-                                           max="{{ $pedido->saldoPendiente() }}"
-                                           class="input-field pl-7"
-                                           placeholder="{{ number_format($pedido->saldoPendiente(), 2) }}" />
+                            @if(!$mostrarFormAbono)
+                                {{-- Dos botones: abono parcial o liquidar todo --}}
+                                <button wire:click="abrirFormAbono"
+                                        class="w-full flex items-center justify-center gap-2 text-amber-700 dark:text-amber-400
+                                               bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40
+                                               border border-amber-200 dark:border-amber-700
+                                               text-sm font-semibold py-2.5 px-3 rounded-xl transition-colors">
+                                    💰 Registrar abono parcial
+                                </button>
+                                <button wire:click="liquidarTodo" class="btn-accion-indigo">
+                                    ✅ Cobrar todo — ${{ number_format($pedido->saldoPendiente(), 2) }}
+                                </button>
+                            @else
+                                {{-- Formulario: ¿cuánto abonó? --}}
+                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-3 space-y-2">
+                                    <p class="text-xs font-semibold text-amber-800 dark:text-amber-300">💰 ¿Cuánto abonó el cliente?</p>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">$</span>
+                                        <input wire:model="montoAbono" type="number" step="0.01" min="0.01"
+                                               max="{{ $pedido->saldoPendiente() }}"
+                                               class="input-field pl-7 text-base font-semibold"
+                                               placeholder="0.00"
+                                               autofocus />
+                                        @error('montoAbono') <p class="text-red-500 text-xs mt-0.5">{{ $message }}</p> @enderror
+                                    </div>
+                                    <select wire:model="metodoPago" class="input-field text-xs">
+                                        <option value="efectivo">Efectivo</option>
+                                        <option value="tarjeta">Tarjeta</option>
+                                        <option value="transferencia">Transferencia</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                    <div class="flex gap-2">
+                                        <button wire:click="cobrar"
+                                                class="flex-1 flex items-center justify-center gap-1.5
+                                                       bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold
+                                                       py-2 rounded-lg transition-colors">
+                                            Confirmar abono
+                                        </button>
+                                        <button wire:click="$set('mostrarFormAbono', false)"
+                                                class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400
+                                                       hover:text-gray-700 border border-gray-200 dark:border-gray-600
+                                                       rounded-lg transition-colors">
+                                            Cancelar
+                                        </button>
+                                    </div>
                                 </div>
-                                @error('montoAbono') <p class="text-red-500 text-xs mt-0.5">{{ $message }}</p> @enderror
-                            </div>
-
-                            <select wire:model="metodoPago" class="input-field">
-                                <option value="efectivo">Efectivo</option>
-                                <option value="tarjeta">Tarjeta</option>
-                                <option value="transferencia">Transferencia</option>
-                                <option value="otro">Otro</option>
-                            </select>
-
-                            <button wire:click="cobrar" class="btn-accion-indigo">
-                                💵 {{ $pedido->tieneAnticipo() ? 'Registrar abono / liquidar' : 'Cobrar pedido' }}
-                            </button>
+                            @endif
                         </div>
 
                         <button wire:click="marcarPendiente"
@@ -286,34 +311,58 @@
                     </div>
                     @if(!$pedido->pagado_en)
                     <div class="mt-4 space-y-2">
-                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Registrar pago</p>
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Cobro</p>
                         @if($pedido->tieneAnticipo())
                         <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2 text-xs space-y-0.5">
-                            <div class="flex justify-between text-gray-600 dark:text-gray-400">
-                                <span>Anticipo pagado:</span>
+                            <div class="flex justify-between text-gray-500 dark:text-gray-400">
+                                <span>Anticipo:</span>
                                 <span class="font-semibold text-amber-700 dark:text-amber-400">${{ number_format($pedido->anticipo, 2) }}</span>
                             </div>
-                            <div class="flex justify-between font-bold text-gray-800 dark:text-gray-200">
-                                <span>Saldo pendiente:</span>
+                            <div class="flex justify-between font-bold">
+                                <span class="text-gray-700 dark:text-gray-200">Saldo:</span>
                                 <span class="text-red-600 dark:text-red-400">${{ number_format($pedido->saldoPendiente(), 2) }}</span>
                             </div>
                         </div>
                         @endif
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                            <input wire:model="montoAbono" type="number" step="0.01" min="0.01"
-                                   class="input-field pl-7"
-                                   placeholder="{{ number_format($pedido->saldoPendiente(), 2) }}" />
-                        </div>
-                        <select wire:model="metodoPago" class="input-field">
-                            <option value="efectivo">Efectivo</option>
-                            <option value="tarjeta">Tarjeta</option>
-                            <option value="transferencia">Transferencia</option>
-                            <option value="otro">Otro</option>
-                        </select>
-                        <button wire:click="cobrar" class="btn-accion-indigo">
-                            💵 {{ $pedido->tieneAnticipo() ? 'Registrar abono / liquidar' : 'Cobrar pedido' }}
-                        </button>
+                        @if(!$mostrarFormAbono)
+                            <button wire:click="abrirFormAbono"
+                                    class="w-full flex items-center justify-center gap-2 text-amber-700 dark:text-amber-400
+                                           bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 border border-amber-200 dark:border-amber-700
+                                           text-sm font-semibold py-2.5 px-3 rounded-xl transition-colors">
+                                💰 Registrar abono parcial
+                            </button>
+                            <button wire:click="liquidarTodo" class="btn-accion-indigo">
+                                ✅ Cobrar todo — ${{ number_format($pedido->saldoPendiente(), 2) }}
+                            </button>
+                        @else
+                            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-3 space-y-2">
+                                <p class="text-xs font-semibold text-amber-800 dark:text-amber-300">💰 ¿Cuánto abonó el cliente?</p>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">$</span>
+                                    <input wire:model="montoAbono" type="number" step="0.01" min="0.01"
+                                           max="{{ $pedido->saldoPendiente() }}"
+                                           class="input-field pl-7 text-base font-semibold"
+                                           placeholder="0.00" />
+                                    @error('montoAbono') <p class="text-red-500 text-xs mt-0.5">{{ $message }}</p> @enderror
+                                </div>
+                                <select wire:model="metodoPago" class="input-field text-xs">
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                    <option value="transferencia">Transferencia</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                                <div class="flex gap-2">
+                                    <button wire:click="cobrar"
+                                            class="flex-1 flex items-center justify-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold py-2 rounded-lg transition-colors">
+                                        Confirmar abono
+                                    </button>
+                                    <button wire:click="$set('mostrarFormAbono', false)"
+                                            class="px-3 py-2 text-xs text-gray-500 hover:text-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                     @endif
                     <button wire:click="marcarPendiente"
