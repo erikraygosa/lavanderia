@@ -322,11 +322,7 @@
 
     {{-- ══════════════════════════════════════════════════════════
          MODAL: VER / ENVIAR MENSAJE
-         @teleport('body') mueve el nodo al <body> para que el
-         fixed overlay cubra el viewport completo, sin que
-         overflow-hidden del layout padre lo recorte.
     ══════════════════════════════════════════════════════════ --}}
-    @teleport('body')
     <div x-data="{ bloqueado: false }"
          x-show="$wire.modalAbierto"
          x-transition:enter="transition ease-out duration-200"
@@ -526,6 +522,5 @@
 
         </div>{{-- fin panel modal --}}
     </div>{{-- fin overlay modal --}}
-    @endteleport
 
 </div>

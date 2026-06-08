@@ -206,7 +206,10 @@
     </aside>
 
     {{-- Main content --}}
-    <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+    {{-- overflow-hidden removido: causaba que fixed children (modales) quedaran
+         confinados al área de contenido en lugar de cubrir el viewport completo.
+         El scroll está manejado por <main class="overflow-y-auto"> --}}
+    <div class="flex-1 flex flex-col min-w-0">
         {{-- Top bar --}}
         <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between flex-shrink-0">
             <div class="flex items-center gap-3">
