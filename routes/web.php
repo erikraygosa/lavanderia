@@ -84,9 +84,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/{usuario}/editar', \App\Livewire\Usuarios\Form::class)->name('editar');
     });
 
-    // Fidelización de clientes — accesible para todos los usuarios autenticados
+    // Fidelización de clientes
     Route::get('/fidelizacion', \App\Livewire\Fidelizacion\ClientesFidelizacion::class)
         ->name('fidelizacion.index');
+    Route::get('/fidelizacion/{cliente}/mensaje', \App\Livewire\Fidelizacion\MensajeCliente::class)
+        ->name('fidelizacion.mensaje');
 
     // Configuración
     Route::get('/configuracion', \App\Livewire\Configuracion\Index::class)
