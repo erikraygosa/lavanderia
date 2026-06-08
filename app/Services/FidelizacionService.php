@@ -15,9 +15,13 @@ class FidelizacionService
     public function clasificarCliente(Cliente $cliente): array
     {
         // Reutiliza la relación si ya está cargada; de lo contrario la consulta
+        // Solo se cuentan pedidos completados (terminado/entregado/pagado) para fidelización
         $pedidos = $cliente->relationLoaded('pedidos')
             ? $cliente->pedidos
-            : $cliente->pedidos()->where('estado', '!=', 'abandonado')->with('items')->get();
+            : $cliente->pedidos()
+                ->whereIn('estado', ['terminado', 'entregado', 'pagado'])
+                ->with('items')
+                ->get();
 
         $totalPedidos  = $pedidos->count();
         $ultimoPedido  = $pedidos->sortByDesc('created_at')->first();

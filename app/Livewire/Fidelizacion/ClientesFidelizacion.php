@@ -50,15 +50,36 @@ class ClientesFidelizacion extends Component
 
     /**
      * Abre el modal de mensaje para el cliente indicado.
+     * IMPORTANTE: $clienteModal solo guarda escalares (sin modelos Eloquent)
+     * para que Livewire pueda serializarlo correctamente entre requests.
      */
     public function abrirModal(int $clienteId): void
     {
         $cliente = Cliente::with([
-            'pedidos' => fn($q) => $q->where('estado', '!=', 'abandonado')->with('items'),
+            // Solo contar pedidos completados para fidelización
+            'pedidos' => fn($q) => $q
+                ->whereIn('estado', ['terminado', 'entregado', 'pagado'])
+                ->with('items'),
         ])->findOrFail($clienteId);
 
-        $this->clienteModal    = app(FidelizacionService::class)->clasificarCliente($cliente);
-        $this->mensajeEditable = $this->clienteModal['mensaje_sugerido'];
+        $clasificacion = app(FidelizacionService::class)->clasificarCliente($cliente);
+
+        // Almacenar solo valores escalares/array — los modelos Eloquent no sobreviven
+        // la serialización JSON de Livewire y quedan como arrays planos en el snapshot
+        $this->clienteModal = [
+            'nombre'               => $cliente->nombre,
+            'telefono'             => $cliente->telefono ?? '',
+            'estado'               => $clasificacion['estado'],
+            'color'                => $clasificacion['color'],
+            'total_pedidos'        => $clasificacion['total_pedidos'],
+            'ultimo_pedido_str'    => $clasificacion['ultimo_pedido']?->toIso8601String(),
+            'dias_sin_venir'       => $clasificacion['dias_sin_venir'],
+            'ticket_promedio'      => $clasificacion['ticket_promedio'],
+            'servicios_frecuentes' => $clasificacion['servicios_frecuentes'],
+            'mensaje_sugerido'     => $clasificacion['mensaje_sugerido'],
+        ];
+
+        $this->mensajeEditable = $clasificacion['mensaje_sugerido'];
         $this->clienteModalId  = $clienteId;
         $this->alertaTipo      = null;
         $this->alertaMensaje   = '';
@@ -144,11 +165,11 @@ class ClientesFidelizacion extends Component
     {
         $service = app(FidelizacionService::class);
 
-        // Cargar todos los clientes activos con sus pedidos e ítems de una sola vez
+        // Cargar todos los clientes activos con sus pedidos completados e ítems
         $clientes = Cliente::where('activo', true)
             ->with([
                 'pedidos' => fn($q) => $q
-                    ->where('estado', '!=', 'abandonado')
+                    ->whereIn('estado', ['terminado', 'entregado', 'pagado'])
                     ->with('items'),
             ])
             ->orderBy('nombre')

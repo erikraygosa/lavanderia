@@ -3,30 +3,43 @@
 namespace App\Livewire;
 
 use App\Models\Pedido;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class Dashboard extends Component
 {
+    // Estados que representan un pedido completado/cobrado
+    private const ESTADOS_VENTAS = ['terminado', 'entregado', 'pagado'];
+
     public function getVentasHoyProperty(): float
     {
-        return Pedido::where('estado', 'pagado')
-            ->whereDate('pagado_en', today())
+        return Pedido::whereIn('estado', self::ESTADOS_VENTAS)
+            ->whereDate('created_at', Carbon::today('America/Merida'))
             ->sum('total');
     }
 
     public function getVentasSemanaProperty(): float
     {
-        return Pedido::where('estado', 'pagado')
-            ->whereBetween('pagado_en', [now()->startOfWeek(), now()->endOfWeek()])
+        $ahora = Carbon::now('America/Merida');
+
+        return Pedido::whereIn('estado', self::ESTADOS_VENTAS)
+            ->whereBetween('created_at', [
+                $ahora->copy()->startOfWeek(),
+                $ahora->copy()->endOfWeek(),
+            ])
             ->sum('total');
     }
 
     public function getVentasMesProperty(): float
     {
-        return Pedido::where('estado', 'pagado')
-            ->whereMonth('pagado_en', now()->month)
-            ->whereYear('pagado_en', now()->year)
+        $ahora = Carbon::now('America/Merida');
+
+        return Pedido::whereIn('estado', self::ESTADOS_VENTAS)
+            ->whereBetween('created_at', [
+                $ahora->copy()->startOfMonth(),
+                $ahora,
+            ])
             ->sum('total');
     }
 
@@ -37,13 +50,16 @@ class Dashboard extends Component
 
     public function getPedidosPagadosHoyProperty(): int
     {
-        return Pedido::where('estado', 'pagado')->whereDate('pagado_en', today())->count();
+        // Pedidos completados creados hoy (pagado_en puede ser null en algunos estados)
+        return Pedido::whereIn('estado', self::ESTADOS_VENTAS)
+            ->whereDate('created_at', Carbon::today('America/Merida'))
+            ->count();
     }
 
     public function getPedidosVencidosProperty(): int
     {
         return Pedido::where('estado', 'pendiente')
-            ->whereDate('fecha_entrega', '<', today())
+            ->whereDate('fecha_entrega', '<', Carbon::today('America/Merida'))
             ->count();
     }
 
@@ -54,9 +70,11 @@ class Dashboard extends Component
 
     public function getGraficaVentasProperty(): array
     {
-        $datos = Pedido::where('estado', 'pagado')
-            ->where('pagado_en', '>=', now()->subDays(6)->startOfDay())
-            ->select(DB::raw('DATE(pagado_en) as fecha'), DB::raw('SUM(total) as total'))
+        $ahora = Carbon::now('America/Merida');
+
+        $datos = Pedido::whereIn('estado', self::ESTADOS_VENTAS)
+            ->where('created_at', '>=', $ahora->copy()->subDays(6)->startOfDay())
+            ->select(DB::raw('DATE(created_at) as fecha'), DB::raw('SUM(total) as total'))
             ->groupBy('fecha')
             ->orderBy('fecha')
             ->pluck('total', 'fecha');
@@ -65,8 +83,8 @@ class Dashboard extends Component
         $values = [];
 
         for ($i = 6; $i >= 0; $i--) {
-            $fecha = now()->subDays($i)->format('Y-m-d');
-            $labels[] = now()->subDays($i)->isoFormat('ddd D');
+            $fecha    = $ahora->copy()->subDays($i)->format('Y-m-d');
+            $labels[] = $ahora->copy()->subDays($i)->isoFormat('ddd D');
             $values[] = (float) ($datos[$fecha] ?? 0);
         }
 
