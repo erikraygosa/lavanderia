@@ -15,7 +15,12 @@
       "Bash(git commit *)",
       "Bash(git branch *)",
       "Bash(git remote *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(php -l app/Services/FidelizacionService.php)",
+      "Bash(php -l app/Services/EvolutionWhatsAppService.php)",
+      "Bash(php -l app/Livewire/Fidelizacion/ClientesFidelizacion.php)",
+      "Bash(php -l app/Models/WhatsappFidelizacionLog.php)",
+      "Bash(php -l app/Livewire/Dashboard.php)"
     ]
   }
 }

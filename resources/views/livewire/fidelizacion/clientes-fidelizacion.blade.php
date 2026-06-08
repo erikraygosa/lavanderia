@@ -322,7 +322,10 @@
 
     {{-- ══════════════════════════════════════════════════════════
          MODAL: VER / ENVIAR MENSAJE
+         x-teleport="body" evita que overflow-hidden del layout
+         recorte el fixed overlay — se renderiza directo en <body>
     ══════════════════════════════════════════════════════════ --}}
+    <template x-teleport="body">
     <div x-data="{ bloqueado: false }"
          x-show="$wire.modalAbierto"
          x-transition:enter="transition ease-out duration-200"
@@ -522,5 +525,6 @@
 
         </div>{{-- fin panel modal --}}
     </div>{{-- fin overlay modal --}}
+    </template>{{-- fin x-teleport --}}
 
 </div>
