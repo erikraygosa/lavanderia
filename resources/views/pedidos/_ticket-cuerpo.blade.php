@@ -99,6 +99,23 @@
     </tr>
 </table>
 
+{{-- Anticipo / Saldo --}}
+@if($pedido->tieneAnticipo())
+<hr class="divider" style="margin: 4px 0;">
+<table>
+    <tr>
+        <td class="small">Anticipo pagado:</td>
+        <td class="right small bold">${{ number_format($pedido->anticipo, 2) }}</td>
+    </tr>
+    @if($pedido->saldoPendiente() > 0)
+    <tr>
+        <td class="small bold">Saldo pendiente:</td>
+        <td class="right small bold">${{ number_format($pedido->saldoPendiente(), 2) }}</td>
+    </tr>
+    @endif
+</table>
+@endif
+
 {{-- Estado de pago --}}
 @if($pedido->estado === 'pagado')
 <hr class="divider" style="margin: 4px 0;">
@@ -114,7 +131,7 @@
 </table>
 @else
 <hr class="divider" style="margin: 4px 0;">
-<p class="center bold small">PENDIENTE DE PAGO</p>
+<p class="center bold small">{{ $pedido->tieneAnticipo() ? 'SALDO PENDIENTE' : 'PENDIENTE DE PAGO' }}</p>
 @endif
 
 {{-- Notas --}}

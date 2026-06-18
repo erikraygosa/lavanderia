@@ -60,6 +60,11 @@ class Pedido extends Model
         return $this->hasMany(PedidoItem::class);
     }
 
+    public function pagos(): HasMany
+    {
+        return $this->hasMany(PedidoPago::class);
+    }
+
     public static function generarFolio(): string
     {
         $anio   = now()->year;

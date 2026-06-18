@@ -20,7 +20,8 @@
       "Bash(php -l app/Services/EvolutionWhatsAppService.php)",
       "Bash(php -l app/Livewire/Fidelizacion/ClientesFidelizacion.php)",
       "Bash(php -l app/Models/WhatsappFidelizacionLog.php)",
-      "Bash(php -l app/Livewire/Dashboard.php)"
+      "Bash(php -l app/Livewire/Dashboard.php)",
+      "Bash(php -l app/Livewire/Fidelizacion/MensajeCliente.php)"
     ]
   }
 }

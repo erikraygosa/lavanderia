@@ -3,6 +3,7 @@
 namespace App\Livewire\Pedidos;
 
 use App\Models\Pedido;
+use App\Models\PedidoPago;
 use App\Services\WhatsappService;
 use Livewire\Component;
 
@@ -115,6 +116,15 @@ class Show extends Component
         }
 
         $this->pedido->update($datos);
+
+        // Registrar el pago en historial con timestamp exacto
+        PedidoPago::create([
+            'pedido_id'   => $this->pedido->id,
+            'monto'       => $this->montoAbono,
+            'metodo_pago' => $this->metodoPago,
+            'tipo'        => $liquidado ? 'liquidacion' : 'anticipo',
+        ]);
+
         $this->pedido->refresh();
         $this->montoAbono       = $this->pedido->saldoPendiente();
         $this->mostrarFormAbono = false;
