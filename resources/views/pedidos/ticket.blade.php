@@ -140,7 +140,6 @@
 {{-- ── Botones (no se imprimen) ─────────────────────────────────────────── --}}
 <div class="acciones">
     <a href="{{ route('pedidos.show', $pedido) }}" class="btn btn-back">← Regresar</a>
-    <button onclick="window.print()" class="btn btn-print">🖨️ Imprimir</button>
 </div>
 
 {{-- ════════════════════════════════════════════════════════════════════════ --}}
