@@ -47,51 +47,86 @@
             </div>
         </div>
 
-        {{-- Canvas - Alpine x-init garantiza init después de que el DOM esté listo --}}
-        <div style="height:240px; position:relative;"
-             x-data="{ datos: {{ Js::from($vm) }} }"
-             x-init="
-                const ctx = $el.querySelector('canvas');
-                const ex  = Chart.getChart(ctx);
-                if (ex) ex.destroy();
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: datos.labels,
-                        datasets: [{
-                            label: 'Dinero recibido',
-                            data: datos.totales,
-                            backgroundColor: 'rgba(99,102,241,0.75)',
-                            borderColor: 'rgb(99,102,241)',
-                            borderWidth: 1,
-                            borderRadius: 5,
-                            hoverBackgroundColor: 'rgba(99,102,241,0.95)',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: (c) => ' $' + c.parsed.y.toLocaleString('es-MX', {minimumFractionDigits:2}),
-                                    afterLabel: (c) => ' ' + datos.pedidos[c.dataIndex] + ' pedido(s)'
-                                }
-                            }
+        {{-- Canvas + botón de mes seleccionado --}}
+        <div x-data="{
+                datos: {{ Js::from($vm) }},
+                fechas: {{ Js::from($vm['fechas'] ?? []) }},
+                mesSeleccionado: null,
+                init() {
+                    const ctx = this.$el.querySelector('canvas');
+                    const ex  = Chart.getChart(ctx);
+                    if (ex) ex.destroy();
+                    const self = this;
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: this.datos.labels,
+                            datasets: [{
+                                label: 'Dinero recibido',
+                                data: this.datos.totales,
+                                backgroundColor: 'rgba(99,102,241,0.75)',
+                                borderColor: 'rgb(99,102,241)',
+                                borderWidth: 1,
+                                borderRadius: 5,
+                                hoverBackgroundColor: 'rgba(99,102,241,0.95)',
+                            }]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { callback: v => '$' + v.toLocaleString('es-MX') },
-                                grid: { color: 'rgba(0,0,0,0.04)' }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            onClick(e, elements) {
+                                if (!elements.length) { self.mesSeleccionado = null; return; }
+                                const i = elements[0].index;
+                                self.mesSeleccionado = {
+                                    label:  self.datos.labels[i],
+                                    monto:  self.datos.totales[i],
+                                    desde:  self.datos.fechas[i].desde,
+                                    hasta:  self.datos.fechas[i].hasta,
+                                };
                             },
-                            x: { grid: { display: false } }
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (c) => ' $' + c.parsed.y.toLocaleString('es-MX', {minimumFractionDigits:2}),
+                                        afterLabel: (c) => ' ' + self.datos.pedidos[c.dataIndex] + ' pedido(s)'
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { callback: v => '$' + v.toLocaleString('es-MX') },
+                                    grid: { color: 'rgba(0,0,0,0.04)' }
+                                },
+                                x: { grid: { display: false } }
+                            }
                         }
-                    }
-                });
-             ">
-            <canvas></canvas>
+                    });
+                }
+             }">
+            <div style="height:240px; position:relative;">
+                <canvas></canvas>
+            </div>
+
+            {{-- Botón flotante al seleccionar un mes --}}
+            <div x-show="mesSeleccionado" x-transition
+                 class="mt-4 flex items-center gap-3 p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl border border-indigo-200 dark:border-indigo-700">
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-indigo-800 dark:text-indigo-200 capitalize"
+                       x-text="mesSeleccionado ? mesSeleccionado.label : ''"></p>
+                    <p class="text-xs text-indigo-500 dark:text-indigo-400"
+                       x-text="mesSeleccionado ? '$' + (mesSeleccionado.monto).toLocaleString('es-MX', {minimumFractionDigits:2}) + ' recibidos' : ''"></p>
+                </div>
+                <a x-bind:href="mesSeleccionado ? '{{ route('pedidos.index') }}?desde=' + mesSeleccionado.desde + '&hasta=' + mesSeleccionado.hasta : '#'"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    Ver pedidos de <span class="capitalize" x-text="mesSeleccionado ? mesSeleccionado.label : ''"></span>
+                </a>
+                <button @click="mesSeleccionado = null" class="text-indigo-400 hover:text-indigo-600">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
         </div>
     </div>
 

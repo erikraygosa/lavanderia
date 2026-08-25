@@ -35,6 +35,7 @@ class Index extends Component
         $labels  = [];
         $totales = [];
         $pedidos = [];
+        $fechas  = [];
 
         for ($i = 11; $i >= 0; $i--) {
             $fecha  = $ahora->copy()->subMonths($i);
@@ -42,9 +43,13 @@ class Index extends Component
             $labels[]  = $fecha->locale('es')->isoFormat('MMM YYYY');
             $totales[] = (float) ($pagos[$key]->total   ?? 0);
             $pedidos[] = (int)   ($pagos[$key]->pedidos ?? 0);
+            $fechas[]  = [
+                'desde' => $fecha->copy()->startOfMonth()->format('Y-m-d'),
+                'hasta' => $fecha->copy()->endOfMonth()->format('Y-m-d'),
+            ];
         }
 
-        return compact('labels', 'totales', 'pedidos');
+        return compact('labels', 'totales', 'pedidos', 'fechas');
     }
 
     public function render()

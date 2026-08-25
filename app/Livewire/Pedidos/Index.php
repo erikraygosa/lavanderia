@@ -12,13 +12,17 @@ class Index extends Component
 
     public string $buscar = '';
     public string $estado = '';
-    public string $fecha = '';
+    public string $fecha  = '';
+    public string $desde  = '';
+    public string $hasta  = '';
 
-    protected $queryString = ['buscar', 'estado', 'fecha'];
+    protected $queryString = ['buscar', 'estado', 'fecha', 'desde', 'hasta'];
 
     public function updatingBuscar(): void { $this->resetPage(); }
     public function updatingEstado(): void { $this->resetPage(); }
     public function updatingFecha(): void  { $this->resetPage(); }
+    public function updatingDesde(): void  { $this->resetPage(); }
+    public function updatingHasta(): void  { $this->resetPage(); }
 
     public function cambiarEstado(int $id, string $estado): void
     {
@@ -39,6 +43,8 @@ class Index extends Component
                 ->orWhereHas('cliente', fn($c) => $c->where('nombre', 'like', "%{$this->buscar}%")))
             ->when($this->estado, fn($q) => $q->where('estado', $this->estado))
             ->when($this->fecha, fn($q) => $q->whereDate('created_at', $this->fecha))
+            ->when($this->desde, fn($q) => $q->whereDate('created_at', '>=', $this->desde))
+            ->when($this->hasta, fn($q) => $q->whereDate('created_at', '<=', $this->hasta))
             ->orderByDesc('id')
             ->paginate(15);
 
