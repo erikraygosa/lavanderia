@@ -5,8 +5,8 @@
 
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h2 class="text-xl font-semibold text-gray-900">Cortes de caja</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Historial de cierres de caja</p>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Cortes de caja</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Historial de cierres de caja</p>
         </div>
         <a href="{{ route('cortes.crear') }}" class="btn-primary">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -14,6 +14,88 @@
         </a>
     </div>
 
+    {{-- ── Gráfica ventas por mes ──────────────────────────────────────────── --}}
+    @php $vm = $this->ventasMensuales; @endphp
+    <div class="card mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-900 dark:text-white">Dinero recibido por mes</h3>
+            <span class="text-xs text-gray-400 dark:text-gray-500">Últimos 12 meses</span>
+        </div>
+
+        {{-- KPIs rápidos --}}
+        @php
+            $totalAnio   = array_sum($vm['totales']);
+            $mejorIdx    = array_search(max($vm['totales']), $vm['totales']);
+            $mejorLabel  = $vm['labels'][$mejorIdx] ?? '—';
+            $mejorMonto  = $vm['totales'][$mejorIdx] ?? 0;
+            $mesActualIdx = 11; // último del array = mes en curso
+        @endphp
+        <div class="grid grid-cols-3 gap-4 mb-5">
+            <div class="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-3 text-center">
+                <p class="text-xs text-indigo-500 dark:text-indigo-400 uppercase tracking-wide mb-1">Total 12 meses</p>
+                <p class="text-xl font-bold text-indigo-700 dark:text-indigo-300">${{ number_format($totalAnio, 2) }}</p>
+            </div>
+            <div class="bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-3 text-center">
+                <p class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-1">Mejor mes</p>
+                <p class="text-xl font-bold text-emerald-700 dark:text-emerald-300">${{ number_format($mejorMonto, 2) }}</p>
+                <p class="text-xs text-emerald-500 dark:text-emerald-400 capitalize">{{ $mejorLabel }}</p>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Mes actual</p>
+                <p class="text-xl font-bold text-gray-700 dark:text-gray-200">${{ number_format($vm['totales'][$mesActualIdx], 2) }}</p>
+                <p class="text-xs text-gray-400 capitalize">{{ $vm['pedidos'][$mesActualIdx] }} pedido(s)</p>
+            </div>
+        </div>
+
+        {{-- Canvas - Alpine x-init garantiza init después de que el DOM esté listo --}}
+        <div style="height:240px; position:relative;"
+             x-data="{ datos: {{ Js::from($vm) }} }"
+             x-init="
+                const ctx = $el.querySelector('canvas');
+                const ex  = Chart.getChart(ctx);
+                if (ex) ex.destroy();
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: datos.labels,
+                        datasets: [{
+                            label: 'Dinero recibido',
+                            data: datos.totales,
+                            backgroundColor: 'rgba(99,102,241,0.75)',
+                            borderColor: 'rgb(99,102,241)',
+                            borderWidth: 1,
+                            borderRadius: 5,
+                            hoverBackgroundColor: 'rgba(99,102,241,0.95)',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (c) => ' $' + c.parsed.y.toLocaleString('es-MX', {minimumFractionDigits:2}),
+                                    afterLabel: (c) => ' ' + datos.pedidos[c.dataIndex] + ' pedido(s)'
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { callback: v => '$' + v.toLocaleString('es-MX') },
+                                grid: { color: 'rgba(0,0,0,0.04)' }
+                            },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+             ">
+            <canvas></canvas>
+        </div>
+    </div>
+
+    {{-- ── Tabla de cortes ─────────────────────────────────────────────────── --}}
     <div class="card p-0 overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-200">
