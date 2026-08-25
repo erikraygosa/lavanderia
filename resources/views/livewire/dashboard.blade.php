@@ -114,7 +114,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 card">
             <h3 class="font-medium text-gray-900 dark:text-white mb-4">Ventas últimos 7 días</h3>
-            <div style="height:200px; position:relative;">
+            <div style="height:200px; position:relative;" x-data x-init="crearGraficaVentas()">
                 <canvas id="graficaVentas"></canvas>
             </div>
         </div>
@@ -188,7 +188,7 @@
         {{-- Gráfica barras apiladas 14 días --}}
         <div class="lg:col-span-2 card">
             <h3 class="font-medium text-gray-900 dark:text-white mb-4">Dinero recibido — últimos 14 días</h3>
-            <div style="height:220px; position:relative;">
+            <div style="height:220px; position:relative;" x-data x-init="crearGraficaFlujo()">
                 <canvas id="graficaFlujo"></canvas>
             </div>
         </div>
@@ -233,11 +233,15 @@
 
 @push('scripts')
 <script>
-// Datos baked-in al cargar la página
+// Datos baked-in al cargar la página (suficiente — son históricos de 14 días)
 window._dashGrafica = @json($this->graficaVentas);
 window._dashFlujo   = @json($this->flujoDiario);
 
-function crearGraficaVentas() {
+// Las funciones son globales para que x-init del canvas las pueda llamar.
+// Alpine invoca x-init justo después de que Livewire agrega el elemento al DOM,
+// garantizando que el canvas ya tiene dimensiones correctas.
+
+window.crearGraficaVentas = function () {
     const ctx = document.getElementById('graficaVentas');
     if (!ctx) return;
     const existing = Chart.getChart(ctx);
@@ -260,9 +264,9 @@ function crearGraficaVentas() {
             }
         }
     });
-}
+};
 
-function crearGraficaFlujo() {
+window.crearGraficaFlujo = function () {
     const ctx = document.getElementById('graficaFlujo');
     if (!ctx) return;
     const existing = Chart.getChart(ctx);
@@ -296,19 +300,6 @@ function crearGraficaFlujo() {
             }
         }
     });
-}
-
-function renderCharts() {
-    crearGraficaVentas();
-    crearGraficaFlujo();
-}
-
-document.addEventListener('DOMContentLoaded', renderCharts);
-document.addEventListener('livewire:navigated', renderCharts);
-document.addEventListener('livewire:updated', () => {
-    // Actualizar datos desde el servidor en cada re-render de Livewire
-    // Re-crear las gráficas que existan en el DOM
-    setTimeout(renderCharts, 50);
-});
+};
 </script>
 @endpush
