@@ -15,7 +15,7 @@
             <div>
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ $negocioNom }}</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ now()->isoFormat('dddd D [de] MMMM, YYYY') }}
+                    {{ \Carbon\Carbon::now()->locale('es')->isoFormat('dddd D [de] MMMM, YYYY') }}
                 </p>
             </div>
         </div>
@@ -233,69 +233,82 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', renderCharts);
-document.addEventListener('livewire:navigated', renderCharts);
-document.addEventListener('livewire:updated', renderCharts);
+// Datos baked-in al cargar la página
+window._dashGrafica = @json($this->graficaVentas);
+window._dashFlujo   = @json($this->flujoDiario);
+
+function crearGraficaVentas() {
+    const ctx = document.getElementById('graficaVentas');
+    if (!ctx) return;
+    const existing = Chart.getChart(ctx);
+    if (existing) existing.destroy();
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: window._dashGrafica.labels,
+            datasets: [{ label: 'Ventas', data: window._dashGrafica.values,
+                backgroundColor: 'rgba(99,102,241,0.7)', borderColor: 'rgb(99,102,241)',
+                borderWidth: 1, borderRadius: 4 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false },
+                tooltip: { callbacks: { label: (c) => ' $'+c.parsed.y.toFixed(2) } } },
+            scales: {
+                y: { beginAtZero: true, ticks: { callback: v => '$'+v }, grid: { color:'rgba(0,0,0,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function crearGraficaFlujo() {
+    const ctx = document.getElementById('graficaFlujo');
+    if (!ctx) return;
+    const existing = Chart.getChart(ctx);
+    if (existing) existing.destroy();
+    const dias     = window._dashFlujo;
+    const labels   = dias.map(d => d.label);
+    const efectivo = dias.map(d => d.efectivo);
+    const tarjeta  = dias.map(d => d.tarjeta);
+    const transfer = dias.map(d => d.transferencia);
+    const otro     = dias.map(d => d.otro);
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                { label: '💵 Efectivo',     data: efectivo, backgroundColor: 'rgba(16,185,129,0.8)',  borderRadius: 3 },
+                { label: '💳 Tarjeta',       data: tarjeta,  backgroundColor: 'rgba(59,130,246,0.8)',  borderRadius: 3 },
+                { label: '🏦 Transferencia', data: transfer, backgroundColor: 'rgba(139,92,246,0.8)', borderRadius: 3 },
+                { label: 'Otro',             data: otro,     backgroundColor: 'rgba(156,163,175,0.7)', borderRadius: 3 },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                tooltip: { callbacks: { label: (c) => ' '+c.dataset.label+': $'+c.parsed.y.toFixed(2) } }
+            },
+            scales: {
+                x: { stacked: true, grid: { display: false } },
+                y: { stacked: true, beginAtZero: true, ticks: { callback: v => '$'+v }, grid: { color:'rgba(0,0,0,0.05)' } }
+            }
+        }
+    });
+}
 
 function renderCharts() {
-    // Gráfica resumen
-    const ctxV = document.getElementById('graficaVentas');
-    if (ctxV && !ctxV._chartInstance) {
-        const grafica = @json($this->graficaVentas);
-        ctxV._chartInstance = new Chart(ctxV, {
-            type: 'bar',
-            data: {
-                labels: grafica.labels,
-                datasets: [{ label: 'Ventas', data: grafica.values,
-                    backgroundColor: 'rgba(99,102,241,0.7)', borderColor: 'rgb(99,102,241)',
-                    borderWidth: 1, borderRadius: 4 }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false },
-                    tooltip: { callbacks: { label: (c) => ' $'+c.parsed.y.toFixed(2) } } },
-                scales: {
-                    y: { beginAtZero: true, ticks: { callback: v => '$'+v }, grid: { color:'rgba(0,0,0,0.05)' } },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
-    }
-
-    // Gráfica flujo de efectivo
-    const ctxF = document.getElementById('graficaFlujo');
-    if (ctxF && !ctxF._chartInstance) {
-        const dias = @json($this->flujoDiario);
-        const labels    = dias.map(d => d.label);
-        const efectivo  = dias.map(d => d.efectivo);
-        const tarjeta   = dias.map(d => d.tarjeta);
-        const transfer  = dias.map(d => d.transferencia);
-        const otro      = dias.map(d => d.otro);
-
-        ctxF._chartInstance = new Chart(ctxF, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [
-                    { label: '💵 Efectivo',      data: efectivo, backgroundColor: 'rgba(16,185,129,0.8)',  borderRadius: 3 },
-                    { label: '💳 Tarjeta',        data: tarjeta,  backgroundColor: 'rgba(59,130,246,0.8)',  borderRadius: 3 },
-                    { label: '🏦 Transferencia',  data: transfer, backgroundColor: 'rgba(139,92,246,0.8)', borderRadius: 3 },
-                    { label: 'Otro',              data: otro,     backgroundColor: 'rgba(156,163,175,0.7)', borderRadius: 3 },
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-                    tooltip: { callbacks: { label: (c) => ' '+c.dataset.label+': $'+c.parsed.y.toFixed(2) } }
-                },
-                scales: {
-                    x: { stacked: true, grid: { display: false } },
-                    y: { stacked: true, beginAtZero: true, ticks: { callback: v => '$'+v }, grid: { color:'rgba(0,0,0,0.05)' } }
-                }
-            }
-        });
-    }
+    crearGraficaVentas();
+    crearGraficaFlujo();
 }
+
+document.addEventListener('DOMContentLoaded', renderCharts);
+document.addEventListener('livewire:navigated', renderCharts);
+document.addEventListener('livewire:updated', () => {
+    // Actualizar datos desde el servidor en cada re-render de Livewire
+    // Re-crear las gráficas que existan en el DOM
+    setTimeout(renderCharts, 50);
+});
 </script>
 @endpush

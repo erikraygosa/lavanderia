@@ -76,7 +76,7 @@
         <div>
             <div class="card">
                 <h3 class="font-medium text-gray-900 mb-3">Generar corte</h3>
-                <p class="text-sm text-gray-500 mb-4">El corte incluirá todos los pedidos con estado "pagado" en el período seleccionado.</p>
+                <p class="text-sm text-gray-500 mb-4">El corte incluirá todo el dinero recibido (abonos y liquidaciones) en el período seleccionado.</p>
 
                 @if($preview)
                     <div class="bg-indigo-50 rounded-lg p-3 mb-4">
